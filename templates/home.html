@@ -5,4 +5,18 @@ Homepage
     Weclome {{name}}
 {% endif %}
 
+{% if flights %}
+    {% for flight in flights %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Flight {{flight.flight_number}}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{flight.departure_time}} - {{flight.arrival_time}}</h6>
+                <p class="card-text">Price: {{flight.base_price}}</p>
+                <a href="/book/{{flight.flight_number}}" class="card-link">Book</a>
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
+
+
 {%endblock%}

@@ -1,0 +1,40 @@
+{%extends "base.html"%}
+{%block content%}
+
+<div class="container">
+	<div class="w-100">
+			<div class="card">
+				<div class="card-header">
+					<h5 class="card-title">Login</h5>
+				</div>
+				<div class="card-body">
+					<p class="card-text">Please login to access the site.</p>
+					<form action="/registerAuth" method="POST">
+						<div class="form-group">
+							<label for="email">Email address</label>
+							<input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
+						</div>
+						<div class="form-group">
+							<label for="password">Password</label>
+							<input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+						</div>
+						<div class="form-group">
+							<label for="confirm password">Password</label>
+							<input type="password" class="form-control" id="confirm password" name="confirm password" placeholder="Confirm password" required>
+						</div>
+						<button type="submit" class="btn btn-primary">Submit</button>
+						{% if error %}
+							<br/>
+							<br/>
+							<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{error}}</div>
+						{% endif %}
+					
+					<a href="/">Go back</a>
+					</form>
+				</div>
+			</div>
+			
+		
+	</div>
+</div>
+{%endblock%}

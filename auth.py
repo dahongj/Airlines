@@ -26,12 +26,11 @@ def loginAuth():
     cursor.execute(query, (email, password))
     data = cursor.fetchone()
     cursor.close()
-    error = None
     if(data):
-        error = email
+        session['user'] = {'email': data['email'], 'first_name': data['first_name'], 'last_name': data['last_name']}
     else:
         error = 'Invalid login or username'
-    return render_template('login.html', error=error)
+    return render_template('home.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'])
 
 @auth.route('/logout')
 def logout():

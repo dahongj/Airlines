@@ -8,7 +8,6 @@
 					<h5 class="card-title">Login</h5>
 				</div>
 				<div class="card-body">
-					<p class="card-text">Please login to access the site.</p>
 					<form action="/loginAuth" method="POST">
 						<div class="form-group">
 							<label for="email">Email address</label>
@@ -18,7 +17,14 @@
 							<label for="password">Password</label>
 							<input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
 						</div>
-						<button type="submit" class="btn btn-primary">Login</button>
+						<button type="submit" class="btn btn-primary">Customer Login</button>
+						{% if error %}
+							<br/>
+							<br/>
+							<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{error}}</div>
+						{% endif %}
+
+						<button type="submit" class="btn btn-primary">Staff Login</button>
 						{% if error %}
 							<br/>
 							<br/>

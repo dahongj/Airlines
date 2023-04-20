@@ -5,10 +5,9 @@
 	<div class="w-100">
 			<div class="card">
 				<div class="card-header">
-					<h5 class="card-title">Login</h5>
+					<h5 class="card-title">Register</h5>
 				</div>
 				<div class="card-body">
-					<p class="card-text">Online Registration</p>
 					<form action="/registerAuth" method="POST">
 						<div class="form-group">
 							<label for="email">Email address</label>
@@ -22,14 +21,21 @@
 							<label for="confirm password">Password</label>
 							<input type="password" class="form-control" id="confirm password" name="confirm password" placeholder="Confirm password" required>
 						</div>
-						<button type="submit" class="btn btn-primary">Register</button>
+						<button type="submit" class="btn btn-primary">Customer Register</button>
 						{% if error %}
 							<br/>
 							<br/>
 							<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{error}}</div>
 						{% endif %}
 					
-					<a href="login">Sign in</a>
+						<button type="submit" class="btn btn-primary">Staff Register</button>
+							{% if error %}
+								<br/>
+								<br/>
+								<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{error}}</div>
+							{% endif %}
+
+						<a href="login">Sign in</a>
 					</form>
 				</div>
 			</div>

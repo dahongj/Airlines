@@ -7,7 +7,7 @@ auth = Blueprint('auth',__name__)
 conn = pymysql.connect(host='localhost',
                         user='root',
                         password='',
-                        db='airplane',
+                        db='airticket',
                         charset='utf8mb4',
                         cursorclass=pymysql.cursors.DictCursor)
 

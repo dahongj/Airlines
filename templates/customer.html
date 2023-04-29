@@ -1,0 +1,14 @@
+{%extends "custbase.html"%}
+{%block content%}
+{% if name %}
+    Welcome {{name}}
+{% endif %}
+
+<div class = "card">
+    <div class="card-body">
+        <a href="custflight" class="button"> My Flights</a>
+        <a href="buyflights" class="button"> Search Flights</a>
+        <a href="custhistory" class="button"> My History</a>
+    </div>
+</div>
+{%endblock%}

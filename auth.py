@@ -15,7 +15,7 @@ conn = pymysql.connect(host='localhost',
 @auth.route('/')
 def home():
     cursor = conn.cursor()
-    query = 'SELECT * FROM flight'
+    query = 'SELECT * FROM Flight WHERE departure_date > CURRENT_DATE OR (departure_date = CURRENT_DATE AND departure_time >= CURRENT_TIME);'
     cursor.execute(query)
     flights = cursor.fetchall()
     cursor.close()
@@ -53,7 +53,7 @@ def loginAuth():
 
     if(user):
         session['user'] = {'email': user['email'], 'first_name': user['first_name'], 'last_name': user['last_name']}
-        return render_template('home.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
+        return render_template('customer.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
     else:
         error = 'Invalid login or username'
         return render_template('login.html', error=error)
@@ -108,3 +108,9 @@ def registerAuth():
         cursor.close()
         return render_template('login.html')
     
+
+
+@auth.route('custflight', methods=['GET', 'POST'])
+def myflight():
+    return render_template('custflight.html')
+

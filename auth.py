@@ -14,11 +14,44 @@ conn = pymysql.connect(host='localhost',
 
 @auth.route('/')
 def home():
+    #cursor created from the conn above
     cursor = conn.cursor()
     query = 'SELECT * FROM Flight WHERE departure_date > CURRENT_DATE OR (departure_date = CURRENT_DATE AND departure_time >= CURRENT_TIME);'
     cursor.execute(query)
     flights = cursor.fetchall()
     cursor.close()
+    return render_template('home.html', flights=flights)
+
+@auth.route('/search', methods=['GET', 'POST'])
+def search():
+    departure_search_area = request.form['departure search area']
+    departure = request.form['departure query']
+    arrival_search_area = request.form['arrival search area']
+    arrival = request.form['arrival query']
+    cursor = conn.cursor()
+
+    # I wanna select from the flights that are filtered by departure matching and then take the arrival flights from that selection
+    # changing the end of the query based on if the user wants to search by city or airport code
+    if departure_search_area == 'departure_city':
+        departure_query_end = " in (SELECT name FROM airport where city = %s)"
+    else:
+        departure_query_end = " = %s"
+    # storing a query as a string to put in the final query
+    departure_query = 'SELECT * FROM Flight WHERE departure_airport_code'+ departure_query_end
+    
+    if arrival == '':
+        cursor.execute(departure_query, departure+"%")
+        flights = cursor.fetchall()
+        cursor.close()
+    else:
+        if arrival_search_area == 'arrival_city':
+            arrival_query_end = " in (SELECT name FROM airport where city =  %s)"
+        else:
+            arrival_query_end = " = %s"
+        query = 'SELECT * FROM (%s) WHERE arrival_airport_code%s' % (departure_query, arrival_query_end)
+        cursor.execute(query, (departure+"%", arrival+"%"))
+        flights = cursor.fetchall()
+        cursor.close()
     return render_template('home.html', flights=flights)
 
 @auth.route('/login')

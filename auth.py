@@ -152,6 +152,13 @@ def custregisterAuth():
 def myflight():
     return render_template('custmyflight.html')
 
+@auth.route('buyflights', methods=['GET', 'POST'])
+def buyflights():
+    return render_template('buyflights.html')
+
+@auth.route('custhistory', methods=['GET', 'POST'])
+def custhistory():
+    return render_template('custhistory.html')
 ############################ STAFF ##############################
 
 @auth.route('/stafflogin')

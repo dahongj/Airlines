@@ -45,6 +45,15 @@ def search():
 def custlogin():
     return render_template('custlogin.html')
 
+@auth.route('custhome',methods=['GET', 'POST'])
+def custhome():
+    
+    cursor = conn.cursor()
+    query = 'SELECT * FROM flight'
+    cursor.execute(query)
+    flights = cursor.fetchall()
+    return render_template('custdashboard.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
+
 @auth.route('/custloginAuth', methods=['GET', 'POST'])
 def custloginAuth():
     email = request.form['email']
@@ -73,7 +82,7 @@ def custloginAuth():
 
     if(user):
         session['user'] = {'email': user['email'], 'first_name': user['first_name'], 'last_name': user['last_name']}
-        return render_template('customer.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
+        return render_template('custdashboard.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
     else:
         error = 'Invalid login or username'
         return render_template('custlogin.html', error=error)

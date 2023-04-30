@@ -41,12 +41,12 @@ def search():
     cursor.close()
     return render_template('home.html', flights=flights)
 
-@auth.route('/login')
-def login():
-    return render_template('login.html')
+@auth.route('/custlogin')
+def custlogin():
+    return render_template('custlogin.html')
 
-@auth.route('/loginAuth', methods=['GET', 'POST'])
-def loginAuth():
+@auth.route('/custloginAuth', methods=['GET', 'POST'])
+def custloginAuth():
     email = request.form['email']
     password = request.form['password']
 
@@ -76,25 +76,25 @@ def loginAuth():
         return render_template('customer.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
     else:
         error = 'Invalid login or username'
-        return render_template('login.html', error=error)
+        return render_template('custlogin.html', error=error)
 
-@auth.route('/logout')
-def logout():
+@auth.route('/custlogout')
+def custlogout():
     return "<p>Logout<p>"
 
-@auth.route('/register')
-def sign_up():
-    return render_template('register.html')
+@auth.route('/custregister')
+def custsign_up():
+    return render_template('custregister.html')
 
-@auth.route('/registerAuth', methods=['GET', 'POST'])
-def registerAuth():
+@auth.route('/custregisterAuth', methods=['GET', 'POST'])
+def custregisterAuth():
     
     password = request.form['password']
     confirm_password = request.form['confirm password']
 
     if(password != confirm_password):
         error = "Passwords don't match"
-        return render_template('register.html', error=error)
+        return render_template('custregister.html', error=error)
     password = md5(password.encode()).hexdigest()
 
     email = request.form['email']
@@ -126,11 +126,18 @@ def registerAuth():
         cursor.execute(ins, (email, last_name, first_name, date_of_birth, password, building_number, street, apartment_number, city, state, zip_code, passport_number, passport_expiration, phone_number))
         conn.commit()
         cursor.close()
-        return render_template('login.html')
-    
-
+        return render_template('custlogin.html')
 
 @auth.route('custflight', methods=['GET', 'POST'])
 def myflight():
     return render_template('custflight.html')
 
+############################ STAFF ##############################
+
+@auth.route('/stafflogin')
+def stafflogin():
+    return render_template('stafflogin.html')
+
+@auth.route('/staffregister')
+def staffsign_up():
+    return render_template('staffregister.html')

@@ -10,20 +10,13 @@
 				<div class="card-body">
 					<form action="/loginAuth" method="POST">
 						<div class="form-group">
-							<label for="email">Email address</label>
-							<input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
+							<label for="username">Username</label>
+							<input type="password" class="form-control" id="username" name="username" placeholder="Username" required>
 						</div>
 						<div class="form-group">
 							<label for="password">Password</label>
 							<input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
 						</div>
-						<button type="submit" class="btn btn-primary">Customer Login</button>
-						{% if error %}
-							<br/>
-							<br/>
-							<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{error}}</div>
-						{% endif %}
-
 						<button type="submit" class="btn btn-primary">Staff Login</button>
 						{% if error %}
 							<br/>
@@ -31,7 +24,7 @@
 							<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{error}}</div>
 						{% endif %}
 					
-					<a href="register">Register</a>
+					<a href="staffregister">Register</a>
 					</form>
 				</div>
 			</div>
@@ -39,4 +32,5 @@
 		
 	</div>
 </div>
+
 {%endblock%}

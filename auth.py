@@ -22,6 +22,7 @@ def home():
     cursor.close()
     return render_template('home.html', flights=flights)
 
+#Search function
 @auth.route('/search', methods=['GET', 'POST'])
 def search():
     departure_search_area = request.form['departure search area']
@@ -41,10 +42,12 @@ def search():
     cursor.close()
     return render_template('home.html', flights=flights)
 
+#Load up customer login form page
 @auth.route('/custlogin')
 def custlogin():
     return render_template('custlogin.html')
 
+#Go to customer dashboard, the home page for a customer
 @auth.route('custhome',methods=['GET', 'POST'])
 def custhome():
     
@@ -54,6 +57,7 @@ def custhome():
     flights = cursor.fetchall()
     return render_template('custdashboard.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
 
+#Customer login authentication
 @auth.route('/custloginAuth', methods=['GET', 'POST'])
 def custloginAuth():
     email = request.form['email']
@@ -86,15 +90,22 @@ def custloginAuth():
     else:
         error = 'Invalid login or username'
         return render_template('custlogin.html', error=error)
+    
+@auth.route('custmyflight')
+def custmyflight():
+    return render_template('custmyflight.html')
 
+#Go to Logout screen
 @auth.route('/custlogout')
 def custlogout():
     return "<p>Logout<p>"
 
+#Load the customer registration form
 @auth.route('/custregister')
 def custsign_up():
     return render_template('custregister.html')
 
+#Customer registration data insertion
 @auth.route('/custregisterAuth', methods=['GET', 'POST'])
 def custregisterAuth():
     
@@ -137,9 +148,9 @@ def custregisterAuth():
         cursor.close()
         return render_template('custlogin.html')
 
-@auth.route('custflight', methods=['GET', 'POST'])
+@auth.route('custmyflight', methods=['GET', 'POST'])
 def myflight():
-    return render_template('custflight.html')
+    return render_template('custmyflight.html')
 
 ############################ STAFF ##############################
 

@@ -40,6 +40,8 @@ def search():
     cursor.execute(query, (departure+"%", arrival+"%"))
     flights = cursor.fetchall()
     cursor.close()
+    if 'user' in session:
+        return render_template('home.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
     return render_template('home.html', flights=flights)
 
 #Load up customer login form page
@@ -150,11 +152,21 @@ def custregisterAuth():
 
 @auth.route('custmyflight', methods=['GET', 'POST'])
 def myflight():
-    return render_template('custmyflight.html')
+    cursor = conn.cursor()
+    query = 'SELECT * FROM customer NATURAL JOIN purchased NATURAL JOIN ticket NATURAL JOIN flight WHERE customer.email = %s'
+    cursor.execute(query, (session['user']['email']))
+    flights = cursor.fetchall()
+    return render_template('custmyflight.html', flights = flights)
 
-@auth.route('buyflights', methods=['GET', 'POST'])
+@auth.route('/purchase/{{flight_number}}', methods=['GET', 'POST'])
 def buyflights():
-    return render_template('buyflights.html')
+    flight_number = request.form['flight_number']
+    cursor = conn.cursor()
+    query = 'SELECT * FROM flight WHERE flight_number = %s'
+    cursor.execute(query, (flight_number))
+    flight = cursor.fetchone()
+
+    return render_template('buyflights.html', flight=flight)
 
 @auth.route('custhistory', methods=['GET', 'POST'])
 def custhistory():

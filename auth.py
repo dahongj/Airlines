@@ -161,7 +161,7 @@ def custhistory():
     return render_template('/custhistory.html')
 ############################ STAFF ##############################
 
-@auth.route('/stafflogin')
+@auth.route('stafflogin')
 def stafflogin():
     return render_template('stafflogin.html')
 
@@ -175,7 +175,7 @@ def staffloginAuth():
     cursor.execute(query)
     flights = cursor.fetchall()
 
-    query = 'SELECT email, first_name, last_name FROM airline_staff WHERE email = %s and password = %s'
+    query = 'SELECT username, first_name, last_name FROM airline_staff WHERE username = %s and password = %s'
     cursor.execute(query, (username, password))
     user = cursor.fetchone()
 
@@ -198,7 +198,7 @@ def staffregisterAuth():
 
     if(password != confirm_password):
         error = "Passwords don't match"
-        return render_template('custregister.html', error=error)
+        return render_template('staffregister.html', error=error)
     password = md5(password.encode()).hexdigest()
 
     email = request.form['email']

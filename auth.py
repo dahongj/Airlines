@@ -40,6 +40,8 @@ def search():
     cursor.execute(query, (departure+"%", arrival+"%"))
     flights = cursor.fetchall()
     cursor.close()
+    if 'user' in session:
+        return render_template('home.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
     return render_template('home.html', flights=flights)
 
 #Load up customer login form page
@@ -50,7 +52,7 @@ def custlogin():
 #Go to customer dashboard, the home page for a customer
 @auth.route('custhome',methods=['GET', 'POST'])
 def custhome():
-    
+
     cursor = conn.cursor()
     query = 'SELECT * FROM flight'
     cursor.execute(query)
@@ -63,7 +65,7 @@ def custloginAuth():
     email = request.form['email']
     password = request.form['password']
 
-    
+
     cursor = conn.cursor()
     query = 'SELECT * FROM flight'
     cursor.execute(query)
@@ -73,7 +75,7 @@ def custloginAuth():
     query = 'SELECT email, first_name, last_name FROM customer WHERE email = %s and password = %s'
     cursor.execute(query, (email, password))
     user = cursor.fetchone()
-    
+
     cursor.close()
     if(user):
         session['user'] = {'email': user['email'], 'first_name': user['first_name'], 'last_name': user['last_name']}
@@ -90,7 +92,7 @@ def custloginAuth():
     else:
         error = 'Invalid login or username'
         return render_template('custlogin.html', error=error)
-    
+
 @auth.route('/custmyflight')
 def custmyflight():
     return render_template('custmyflight.html')
@@ -108,7 +110,7 @@ def custsign_up():
 #Customer registration data insertion
 @auth.route('/custregisterAuth', methods=['GET', 'POST'])
 def custregisterAuth():
-    
+
     password = request.form['password']
     confirm_password = request.form['confirm password']
 
@@ -150,18 +152,28 @@ def custregisterAuth():
 
 @auth.route('/custmyflight', methods=['GET', 'POST'])
 def myflight():
-    return render_template('custmyflight.html')
+    cursor = conn.cursor()
+    query = 'SELECT * FROM customer NATURAL JOIN purchased NATURAL JOIN ticket NATURAL JOIN flight WHERE customer.email = %s'
+    cursor.execute(query, (session['user']['email']))
+    flights = cursor.fetchall()
+    return render_template('custmyflight.html', flights = flights)
 
-@auth.route('/buyflights', methods=['GET', 'POST'])
+@auth.route('/purchase/{{flight_number}}', methods=['GET', 'POST'])
 def buyflights():
-    return render_template('/buyflights.html')
+    flight_number = request.form['flight_number']
+    cursor = conn.cursor()
+    query = 'SELECT * FROM flight WHERE flight_number = %s'
+    cursor.execute(query, (flight_number))
+    flight = cursor.fetchone()
+
+    return render_template('buyflights.html', flight=flight)
 
 @auth.route('/custhistory', methods=['GET', 'POST'])
 def custhistory():
     return render_template('/custhistory.html')
 ############################ STAFF ##############################
 
-@auth.route('stafflogin')
+@auth.route('/stafflogin')
 def stafflogin():
     return render_template('stafflogin.html')
 
@@ -192,7 +204,7 @@ def staffsign_up():
 
 @auth.route('/staffregisterAuth', methods=['GET', 'POST'])
 def staffregisterAuth():
-    
+
     password = request.form['password']
     confirm_password = request.form['confirm password']
 

@@ -173,11 +173,11 @@ def custhistory():
     return render_template('/custhistory.html')
 ############################ STAFF ##############################
 
-@auth.route('stafflogin')
+@auth.route('/stafflogin')
 def stafflogin():
     return render_template('stafflogin.html')
 
-@auth.route('/staffloginAuth')
+@auth.route('/staffloginAuth', methods=['GET', 'POST'])
 def staffloginAuth():
     username = request.form['username']
     password = request.form['password']
@@ -188,7 +188,7 @@ def staffloginAuth():
     flights = cursor.fetchall()
 
     query = 'SELECT username, first_name, last_name FROM airline_staff WHERE username = %s and password = %s'
-    cursor.execute(query, (username, password))
+    cursor.execute(query, (username, md5(password.encode()).hexdigest()))
     user = cursor.fetchone()
 
     if(user):

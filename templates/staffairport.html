@@ -1,0 +1,51 @@
+{%extends "staffbase.html"%}
+{%block content%}
+
+<div class="container">
+	<div class="w-100">
+			<div class="card">
+				<div class="card-header">
+					<h5 class="card-title">Register</h5>
+				</div>
+				<div class="card-body">
+					<form action="/staffairportAuth" method="POST">
+						<div class="container py 5">
+							<div class="row d-flex justify-content-center align-items-center">
+								<div class="col">
+									<h4>Airport Info</h4>
+                                    <div class="form-group">
+										<label for="code">Code</label>  
+										<input type="text" class="form-control" id="code" name="code" placeholder="Code" required>
+									</div>
+									<div class="form-group">
+										<label for="name">Name</label>
+										<input type="text" class="form-control" id="name" name="name" placeholder="Name" required>
+									</div>
+									<div class="form-group">
+										<label for="city">City</label>
+										<input type="text" class="form-control" id="city" name="city" placeholder="City" required>
+									</div>
+									<div class="form-group">
+										<label for="country">Country</label>
+										<input type="text" class="form-control" id="country" name="country" placeholder="Country" required>
+									</div>
+                                    <div class="form-group">
+										<label for="type">Type</label>
+										<input type="type" class="form-control" id="type" name="type" placeholder="Type" required>
+									</div>
+                                    
+								</div>
+						</div>
+							<button type="submit" class="btn btn-primary">Register Airport</button>
+							{% if error %}
+								<br/>
+								<br/>
+								<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{error}}</div>
+							{% endif %}
+
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+{%endblock%}

@@ -170,11 +170,12 @@ def buyflights():
 def custhistory():
     return render_template('/custhistory.html')
 ############################ STAFF ##############################
-
+#Login template
 @auth.route('/stafflogin', methods=['GET', 'POST'])
 def stafflogin():
     return render_template('stafflogin.html')
 
+#Login authorization
 @auth.route('/staffloginAuth', methods=['GET', 'POST'])
 def staffloginAuth():
     username = request.form['username']
@@ -194,6 +195,7 @@ def staffloginAuth():
         error = 'Invalid login or username'
         return render_template('stafflogin.html', error=error)
 
+#Register template
 @auth.route('/staffregister', methods=['GET', 'POST'])
 def staffsign_up():
     cursor = conn.cursor()
@@ -202,6 +204,7 @@ def staffsign_up():
     airlines = cursor.fetchall()
     return render_template('staffregister.html', airlines=airlines)
 
+#Register authorization
 @auth.route('/staffregisterAuth', methods=['GET', 'POST'])
 def staffregisterAuth():
 
@@ -236,10 +239,10 @@ def staffregisterAuth():
         cursor.close()
         return render_template('stafflogin.html')
 
+#Homepage template
 @auth.route('/staffhome',methods=['GET', 'POST'])
 def staffhome():
-
-    return render_template('staffdashboard.html')
+    return render_template('staffdashboard.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'])
 
 @auth.route('/logout')
 def logout():
@@ -247,12 +250,113 @@ def logout():
         session.pop('user')
     return redirect('/')
 
+#Flight template
 @auth.route('staffflight', methods=['GET', 'POST'])
 def staffflight():
     cursor = conn.cursor()
-    query = 'SELECT * FROM Flight WHERE (departure_date >= CURRENT_DATE AND departure_time >= CURRENT_TIME AND departure_date <= CURRENT_DATE + 30) AND airline_name = %s'
+    query = 'SELECT * FROM Flight WHERE (departure_date > CURRENT_DATE OR (departure_date = CURRENT_DATE AND departure_time >= CURRENT_TIME) AND departure_date <= CURRENT_DATE + 30) AND airline_name = %s'
     cursor.execute(query, (session['user']['airline_name']))
     flights = cursor.fetchall()
 
     cursor.close()
     return render_template('staffflight.html', flights = flights)
+
+#Flight search
+@auth.route('/staffsearch', methods=['GET', 'POST'])
+def staffsearch():
+    departure_search_area = request.form['departure search area']
+    if departure_search_area not in ['name', 'city']:
+        departure_search_area = 'name'
+    departure = request.form['departure query']
+    arrival_search_area = request.form['arrival search area']
+    if arrival_search_area not in ['name', 'city']:
+        arrival_search_area = 'name'
+    arrival = request.form['arrival query']
+    cursor = conn.cursor()
+
+    # I wanna select from the flights that are filtered by departure matching and then take the arrival flights from that selection
+    query = "SELECT * FROM flight JOIN airport departure_airport ON flight.departure_airport_code=departure_airport.name JOIN airport arrival_airport ON flight.arrival_airport_code=arrival_airport.name WHERE airline_name = %s AND departure_airport.{departure_search} LIKE %s and arrival_airport.{arrival_search} LIKE %s".format(departure_search=departure_search_area, arrival_search=arrival_search_area)
+    cursor.execute(query, (session['user']['airline_name'],departure+"%", arrival+"%"))
+    flights = cursor.fetchall()
+    cursor.close()
+    if 'user' in session:
+        return render_template('staffflight.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
+    return render_template('staffflight.html', flights=flights)
+
+#INFRASTRUCTURE
+#template
+@auth.route('/staffinfra', methods=['GET', 'POST'])
+def staffinfra():
+    return render_template('staffinfra.html')
+
+@auth.route('/staffairportlist', methods=['GET', 'POST'])
+def staffairportlist():
+    cursor = conn.cursor()
+    query = 'SELECT * FROM airport WHERE 1'
+    cursor.execute(query)
+    airports = cursor.fetchall()
+    return render_template('staffairportlist.html', airports = airports)
+
+#Airport template
+@auth.route('/staffairport', methods=['GET','POST'])
+def staffairport():
+    return render_template('staffairport.html')
+
+#Airport authorization
+@auth.route('/staffairportAuth', methods=['GET','POST'])
+def staffairportAuth():
+    code = request.form['code']
+    name = request.form['name']
+    city = request.form['city']
+    country = request.form['country']
+    type = request.form['type']
+
+    cursor = conn.cursor()
+    query = 'SELECT * FROM airport WHERE code = %s'
+    cursor.execute(query, (code))
+    data = cursor.fetchone()
+    error = None
+    if(data):
+        error = "This airport already exists"
+        return render_template('staffairport.html', error=error)
+    else:
+        ins = 'INSERT INTO airport VALUES(%s, %s, %s, %s, %s)'
+        cursor.execute(ins, (code,name, city, country, type))
+        conn.commit()
+        cursor.close()
+        return redirect('/staffairportlist')
+
+@auth.route('/staffairplanelist', methods=['GET', 'POST'])
+def staffairplanelist():
+    cursor = conn.cursor()
+    query = 'SELECT * FROM airplane WHERE airline_name = %s'
+    cursor.execute(query,(session['user']['airline_name']))
+    airplanes = cursor.fetchall()
+    return render_template('staffairplanelist.html', airplanes = airplanes)
+
+@auth.route('/staffairplane', methods=['GET','POST'])
+def staffairplane():
+    return render_template('staffairplane.html')
+
+@auth.route('/staffairplaneAuth', methods=['GET','POST'])
+def staffairplaneAuth():
+    code = request.form['code']
+    name = request.form['name']
+    city = request.form['city']
+    country = request.form['country']
+    type = request.form['type']
+
+    cursor = conn.cursor()
+    query = 'SELECT * FROM airport WHERE code = %s'
+    cursor.execute(query, (code))
+    data = cursor.fetchone()
+    error = None
+    if(data):
+        error = "This airport already exists"
+        return render_template('staffairplane.html', error=error)
+    else:
+        ins = 'INSERT INTO airport VALUES(%s, %s, %s, %s, %s)'
+        cursor.execute(ins, (code,name, city, country, type))
+        conn.commit()
+        cursor.close()
+        return redirect('/staffairplanelist')

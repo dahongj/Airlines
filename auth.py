@@ -165,7 +165,7 @@ def custhistory():
 def stafflogin():
     return render_template('stafflogin.html')
 
-@auth.route('/staffloginAuth')
+@auth.route('/staffloginAuth', methods=['GET', 'POST'])
 def staffloginAuth():
     username = request.form['username']
     password = request.form['password']
@@ -175,8 +175,8 @@ def staffloginAuth():
     cursor.execute(query)
     flights = cursor.fetchall()
 
-    query = 'SELECT username, first_name, last_name FROM airline_staff WHERE username = %s and password = %s'
-    cursor.execute(query, (username, password))
+    query = 'SELECT username, first_name, last_name FROM airline_staff WHERE username = %s and PASSWORD = %s'
+    cursor.execute(query, (username, md5(password.encode()).hexdigest()))
     user = cursor.fetchone()
 
     if(user):
@@ -226,4 +226,8 @@ def staffregisterAuth():
 
 @auth.route('/staffhome',methods=['GET', 'POST'])
 def staffhome():
-    return render_template('staffbase.html')
+    cursor = conn.cursor()
+    query = 'SELECT * FROM flight'
+    cursor.execute(query)
+    flights = cursor.fetchall()
+    return render_template('staffdashboard.html')

@@ -52,7 +52,7 @@ def custlogin():
 #Go to customer dashboard, the home page for a customer
 @auth.route('custhome',methods=['GET', 'POST'])
 def custhome():
-    
+
     cursor = conn.cursor()
     query = 'SELECT * FROM flight'
     cursor.execute(query)
@@ -65,7 +65,7 @@ def custloginAuth():
     email = request.form['email']
     password = request.form['password']
 
-    
+
     cursor = conn.cursor()
     query = 'SELECT * FROM flight'
     cursor.execute(query)
@@ -75,7 +75,7 @@ def custloginAuth():
     query = 'SELECT email, first_name, last_name FROM customer WHERE email = %s and password = %s'
     cursor.execute(query, (email, password))
     user = cursor.fetchone()
-    
+
     cursor.close()
     if(user):
         session['user'] = {'email': user['email'], 'first_name': user['first_name'], 'last_name': user['last_name']}
@@ -92,8 +92,8 @@ def custloginAuth():
     else:
         error = 'Invalid login or username'
         return render_template('custlogin.html', error=error)
-    
-@auth.route('custmyflight')
+
+@auth.route('/custmyflight')
 def custmyflight():
     return render_template('custmyflight.html')
 
@@ -110,7 +110,7 @@ def custsign_up():
 #Customer registration data insertion
 @auth.route('/custregisterAuth', methods=['GET', 'POST'])
 def custregisterAuth():
-    
+
     password = request.form['password']
     confirm_password = request.form['confirm password']
 
@@ -142,7 +142,7 @@ def custregisterAuth():
     error = None
     if(data):
         error = "This user already exists"
-        return render_template('register.html', error=error)
+        return render_template('custregister.html', error=error)
     else:
         ins = 'INSERT INTO customer VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
         cursor.execute(ins, (email, last_name, first_name, date_of_birth, password, building_number, street, apartment_number, city, state, zip_code, passport_number, passport_expiration, phone_number))
@@ -150,7 +150,7 @@ def custregisterAuth():
         cursor.close()
         return render_template('custlogin.html')
 
-@auth.route('custmyflight', methods=['GET', 'POST'])
+@auth.route('/custmyflight', methods=['GET', 'POST'])
 def myflight():
     cursor = conn.cursor()
     query = 'SELECT * FROM customer NATURAL JOIN purchased NATURAL JOIN ticket NATURAL JOIN flight WHERE customer.email = %s'
@@ -168,15 +168,74 @@ def buyflights():
 
     return render_template('buyflights.html', flight=flight)
 
-@auth.route('custhistory', methods=['GET', 'POST'])
+@auth.route('/custhistory', methods=['GET', 'POST'])
 def custhistory():
-    return render_template('custhistory.html')
+    return render_template('/custhistory.html')
 ############################ STAFF ##############################
 
-@auth.route('/stafflogin')
+@auth.route('stafflogin')
 def stafflogin():
     return render_template('stafflogin.html')
+
+@auth.route('/staffloginAuth')
+def staffloginAuth():
+    username = request.form['username']
+    password = request.form['password']
+
+    cursor = conn.cursor()
+    query = 'SELECT * FROM flight'
+    cursor.execute(query)
+    flights = cursor.fetchall()
+
+    query = 'SELECT username, first_name, last_name FROM airline_staff WHERE username = %s and password = %s'
+    cursor.execute(query, (username, password))
+    user = cursor.fetchone()
+
+    if(user):
+        session['user'] = {'username': user['username'], 'first_name': user['first_name'], 'last_name': user['last_name']}
+        return render_template('staffdashboard.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
+    else:
+        error = 'Invalid login or username'
+        return render_template('stafflogin.html', error=error)
 
 @auth.route('/staffregister')
 def staffsign_up():
     return render_template('staffregister.html')
+
+@auth.route('/staffregisterAuth', methods=['GET', 'POST'])
+def staffregisterAuth():
+
+    password = request.form['password']
+    confirm_password = request.form['confirm password']
+
+    if(password != confirm_password):
+        error = "Passwords don't match"
+        return render_template('staffregister.html', error=error)
+    password = md5(password.encode()).hexdigest()
+
+    email = request.form['email']
+    first_name = request.form['first name']
+    last_name = request.form['last name']
+    date_of_birth = request.form['date of birth']
+    phone_number = request.form['phone number']
+    airline = request.form['airline']
+    username = request.form['username']
+
+    cursor = conn.cursor()
+    query = 'SELECT * FROM airline_staff WHERE username = %s'
+    cursor.execute(query, (username))
+    data = cursor.fetchone()
+    error = None
+    if(data):
+        error = "This user already exists"
+        return render_template('staffregister.html', error=error)
+    else:
+        ins = 'INSERT INTO airline_staff VALUES(%s, %s, %s, %s, %s, %s, %s, %s)'
+        cursor.execute(ins, (username,airline, password, last_name, first_name, email, phone_number, date_of_birth))
+        conn.commit()
+        cursor.close()
+        return render_template('stafflogin.html')
+
+@auth.route('/staffhome',methods=['GET', 'POST'])
+def staffhome():
+    return render_template('staffbase.html')

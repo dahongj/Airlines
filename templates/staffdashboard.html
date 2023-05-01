@@ -1,0 +1,20 @@
+{%extends "staffbase.html"%}
+{%block content%}
+{% if name %}
+    Welcome {{name}}
+{% endif %}
+
+<div class = "card">
+    <div class="card-body">
+        <div class="col">
+            <a href="/" class="button"> My Flights</a>
+        </div>
+        <div class="col">
+            <a href="/" class="button"> Search Flights</a>
+        </div>
+        <div class="col">
+            <a href="/" class="button"> My History</a>
+        </div>
+    </div>
+</div>
+{%endblock%}

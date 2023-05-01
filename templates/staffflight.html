@@ -1,0 +1,17 @@
+{%extends "staffbase.html"%}
+{%block content%}
+
+    {% if flights %}
+        {% for flight in flights %}
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Flight {{flight.flight_number}}</h5>
+                    <h5 class="card-title">{{flight.departure_airport_code}} to {{flight.arrival_airport_code}}</h5>
+                    <h7 class="card-subtitle mb-2 text-muted">{{flight.departure_date}} | {{flight.departure_time}} - {{flight.arrival_date}} | {{flight.arrival_time}}</h6>
+                    <p class="card-text">Price: {{flight.base_price}}</p>
+                    <a href="/purchase/{{flight.flight_number}}" class="btn btn-primary">Buy</a>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+{%endblock%}

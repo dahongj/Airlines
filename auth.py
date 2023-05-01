@@ -54,12 +54,7 @@ def custlogin():
 #Go to customer dashboard, the home page for a customer
 @auth.route('custhome',methods=['GET', 'POST'])
 def custhome():
-
-    cursor = conn.cursor()
-    query = 'SELECT * FROM flight'
-    cursor.execute(query)
-    flights = cursor.fetchall()
-    return render_template('custdashboard.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
+    return render_template('custdashboard.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'])
 
 #Customer login authentication
 @auth.route('/custloginAuth', methods=['GET', 'POST'])
@@ -102,6 +97,7 @@ def custmyflight():
 #Go to Logout screen
 @auth.route('/custlogout')
 def custlogout():
+    session.clear()
     return "<p>Logout<p>"
 
 #Load the customer registration form
@@ -175,7 +171,7 @@ def custhistory():
     return render_template('/custhistory.html')
 ############################ STAFF ##############################
 
-@auth.route('/stafflogin')
+@auth.route('/stafflogin', methods=['GET', 'POST'])
 def stafflogin():
     return render_template('stafflogin.html')
 
@@ -185,22 +181,20 @@ def staffloginAuth():
     password = request.form['password']
 
     cursor = conn.cursor()
-    query = 'SELECT * FROM flight'
-    cursor.execute(query)
-    flights = cursor.fetchall()
-
-    query = 'SELECT username, first_name, last_name FROM airline_staff WHERE username = %s and PASSWORD = %s'
+    query = 'SELECT username, first_name, last_name, airline_name, email, phone_number, date_of_birth FROM airline_staff WHERE username = %s and PASSWORD = %s'
     cursor.execute(query, (username, md5(password.encode()).hexdigest()))
     user = cursor.fetchone()
 
     if(user):
-        session['user'] = {'username': user['username'], 'first_name': user['first_name'], 'last_name': user['last_name']}
-        return render_template('staffdashboard.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
+        session['user'] = {'username': user['username'], 'first_name': user['first_name'], 'last_name': user['last_name'],
+                            'airline_name': user['airline_name'], 'email': user['email'], 'phone_number' : user['phone_number'],
+                            'date_of_birth': user['date_of_birth']}
+        return render_template('staffdashboard.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'])
     else:
         error = 'Invalid login or username'
         return render_template('stafflogin.html', error=error)
 
-@auth.route('/staffregister')
+@auth.route('/staffregister', methods=['GET', 'POST'])
 def staffsign_up():
     cursor = conn.cursor()
     query = 'SELECT name FROM airline'
@@ -244,10 +238,7 @@ def staffregisterAuth():
 
 @auth.route('/staffhome',methods=['GET', 'POST'])
 def staffhome():
-    cursor = conn.cursor()
-    query = 'SELECT * FROM flight'
-    cursor.execute(query)
-    flights = cursor.fetchall()
+
     return render_template('staffdashboard.html')
 
 @auth.route('/logout')
@@ -255,3 +246,13 @@ def logout():
     if 'user' in session:
         session.pop('user')
     return redirect('/')
+
+@auth.route('staffflight', methods=['GET', 'POST'])
+def staffflight():
+    cursor = conn.cursor()
+    query = 'SELECT * FROM Flight WHERE (departure_date >= CURRENT_DATE AND departure_time >= CURRENT_TIME AND departure_date <= CURRENT_DATE + 30) AND airline_name = %s'
+    cursor.execute(query, (session['user']['airline_name']))
+    flights = cursor.fetchall()
+
+    cursor.close()
+    return render_template('staffflight.html', flights = flights)

@@ -48,10 +48,14 @@
 									<label for="phone number">Phone Number</label>
 									<input type="text" class="form-control" id="phone number" name="phone number" placeholder="Enter phone number" required>
 								</div>
-                                <div class="form-group">
-									<label for="airline">Airline</label>
-									<input type="text" class="form-control" id="airline" name="airline" placeholder= "Enter airline" required>
-								</div>
+								
+								<label for="employer">Airline Employer</label>
+								<select class="form-select" name="airline employer" id="airline employer" required>
+									<option disabled selected>Select Airport</option>
+									{% for airline in airlines %}
+										<option value="{{airline.name}}">{{airline.name}}</option>
+									{% endfor %}
+								</select>
 							</div>
 						</div>
 							<button type="submit" class="btn btn-primary">Staff Register</button>

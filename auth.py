@@ -20,6 +20,8 @@ def home():
     cursor.execute(query)
     flights = cursor.fetchall()
     cursor.close()
+    if 'user' in session:
+        return render_template('home.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
     return render_template('home.html', flights=flights)
 
 #Search function
@@ -200,7 +202,11 @@ def staffloginAuth():
 
 @auth.route('/staffregister')
 def staffsign_up():
-    return render_template('staffregister.html')
+    cursor = conn.cursor()
+    query = 'SELECT name FROM airline'
+    cursor.execute(query)
+    airlines = cursor.fetchall()
+    return render_template('staffregister.html', airlines=airlines)
 
 @auth.route('/staffregisterAuth', methods=['GET', 'POST'])
 def staffregisterAuth():
@@ -218,7 +224,7 @@ def staffregisterAuth():
     last_name = request.form['last name']
     date_of_birth = request.form['date of birth']
     phone_number = request.form['phone number']
-    airline = request.form['airline']
+    airline = request.form['airline employer']
     username = request.form['username']
 
     cursor = conn.cursor()
@@ -243,3 +249,9 @@ def staffhome():
     cursor.execute(query)
     flights = cursor.fetchall()
     return render_template('staffdashboard.html')
+
+@auth.route('/logout')
+def logout():
+    if 'user' in session:
+        session.pop('user')
+    return redirect('/')

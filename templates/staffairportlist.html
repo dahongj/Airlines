@@ -1,0 +1,17 @@
+{%extends "staffbase.html"%}
+{%block content%}
+<a href="/staffairport" class="btn btn-primary">Add new airport</a>
+    {% if airports %}
+    {% for airport in airports %}
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">{{airport.code}}</h4>
+                <h5 class="card-title">{{airport.name}}</h5>
+                <h6 class="card-title">City: {{airport.city}}</h6>
+                <h6 class="card-title">Country: {{airport.country}}</h6>
+                <h6 class="card-title">{{airport.type}}</h6>
+            </div>
+        </div>
+    {% endfor %}
+    {% endif %}
+{%endblock%}

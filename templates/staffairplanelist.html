@@ -1,0 +1,17 @@
+{%extends "staffbase.html"%}
+{%block content%}
+<a href="/staffairplane" class="btn btn-primary">Add new airplane</a>
+    {% if airplanes %}
+    {% for airplane in airplanes %}
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">{{airplane.airline_name}}</h4>
+                <h5 class="card-title">{{airplane.identification_number}}</h5>
+                <h6 class="card-title">{{airplane.seat_count}}</h6>
+                <h6 class="card-title">{{airplane.manufacturer}}</h6>
+                <h6 class="card-title">{{airplane.manufacture_date}}</h6>
+            </div>
+        </div>
+    {% endfor %}
+    {% endif %}
+{%endblock%}

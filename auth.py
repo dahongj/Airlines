@@ -234,7 +234,7 @@ def staffregisterAuth():
         return render_template('staffregister.html', error=error)
     else:
         ins = 'INSERT INTO airline_staff VALUES(%s, %s, %s, %s, %s, %s, %s, %s)'
-        cursor.execute(ins, (username,airline, password, last_name, first_name, email, phone_number, date_of_birth))
+        cursor.execute(ins, (username,password, last_name, first_name, email, phone_number, date_of_birth))
         conn.commit()
         cursor.close()
         return render_template('stafflogin.html')
@@ -254,8 +254,8 @@ def logout():
 @auth.route('staffflight', methods=['GET', 'POST'])
 def staffflight():
     cursor = conn.cursor()
-    query = 'SELECT * FROM Flight WHERE (departure_date > CURRENT_DATE OR (departure_date = CURRENT_DATE AND departure_time >= CURRENT_TIME) AND departure_date <= CURRENT_DATE + 30) AND airline_name = %s'
-    cursor.execute(query, (session['user']['airline_name']))
+    query = 'SELECT * FROM Flight WHERE (departure_date > CURRENT_DATE OR (departure_date = CURRENT_DATE AND departure_time >= CURRENT_TIME) AND departure_date <= CURRENT_DATE + 30)'
+    cursor.execute(query)
     flights = cursor.fetchall()
 
     cursor.close()
@@ -275,8 +275,8 @@ def staffsearch():
     cursor = conn.cursor()
 
     # I wanna select from the flights that are filtered by departure matching and then take the arrival flights from that selection
-    query = "SELECT * FROM flight JOIN airport departure_airport ON flight.departure_airport_code=departure_airport.name JOIN airport arrival_airport ON flight.arrival_airport_code=arrival_airport.name WHERE airline_name = %s AND departure_airport.{departure_search} LIKE %s and arrival_airport.{arrival_search} LIKE %s".format(departure_search=departure_search_area, arrival_search=arrival_search_area)
-    cursor.execute(query, (session['user']['airline_name'],departure+"%", arrival+"%"))
+    query = "SELECT * FROM flight JOIN airport departure_airport ON flight.departure_airport_code=departure_airport.name JOIN airport arrival_airport ON flight.arrival_airport_code=arrival_airport.name WHERE departure_airport.{departure_search} LIKE %s and arrival_airport.{arrival_search} LIKE %s".format(departure_search=departure_search_area, arrival_search=arrival_search_area)
+    cursor.execute(query, (departure+"%", arrival+"%"))
     flights = cursor.fetchall()
     cursor.close()
     if 'user' in session:
@@ -329,8 +329,8 @@ def staffairportAuth():
 @auth.route('/staffairplanelist', methods=['GET', 'POST'])
 def staffairplanelist():
     cursor = conn.cursor()
-    query = 'SELECT * FROM airplane WHERE airline_name = %s'
-    cursor.execute(query,(session['user']['airline_name']))
+    query = 'SELECT * FROM airplane'
+    cursor.execute(query)
     airplanes = cursor.fetchall()
     return render_template('staffairplanelist.html', airplanes = airplanes)
 
@@ -360,4 +360,3 @@ def staffairplaneAuth():
         conn.commit()
         cursor.close()
         return redirect('/staffairplanelist')
-    

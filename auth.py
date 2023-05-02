@@ -340,7 +340,6 @@ def staffairplane():
 
 @auth.route('/staffairplaneAuth', methods=['GET','POST'])
 def staffairplaneAuth():
-    airline_name = request.form['airline_name']
     identification_number = request.form['identification_number']
     seat_count = request.form['seat_count']
     manufacturer = request.form['manufacturer']

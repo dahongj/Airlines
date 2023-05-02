@@ -355,8 +355,8 @@ def staffairplaneAuth():
         error = "This airplane already exists"
         return render_template('staffairplane.html', error=error)
     else:
-        ins = 'INSERT INTO airport VALUES(%s, %s, %s, %s, %s)'
-        cursor.execute(ins, (airline_name,identification_number, seat_count, manufacturer, manufacture_date))
+        ins = 'INSERT INTO airplane VALUES(%s, %s, %s, %s, %s)'
+        cursor.execute(ins, (session['user']['airline_name'],identification_number, seat_count, manufacturer, manufacture_date))
         conn.commit()
         cursor.close()
         return redirect('/staffairplanelist')

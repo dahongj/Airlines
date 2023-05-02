@@ -340,23 +340,24 @@ def staffairplane():
 
 @auth.route('/staffairplaneAuth', methods=['GET','POST'])
 def staffairplaneAuth():
-    code = request.form['code']
-    name = request.form['name']
-    city = request.form['city']
-    country = request.form['country']
-    type = request.form['type']
+    airline_name = request.form['airline_name']
+    identification_number = request.form['identification_number']
+    seat_count = request.form['seat_count']
+    manufacturer = request.form['manufacturer']
+    manufacture_date = request.form['manufacture_date']
 
     cursor = conn.cursor()
-    query = 'SELECT * FROM airport WHERE code = %s'
-    cursor.execute(query, (code))
+    query = 'SELECT * FROM airplane WHERE airline_name = %s AND identification_number = %s'
+    cursor.execute(query, (airline_name,identification_number))
     data = cursor.fetchone()
     error = None
     if(data):
-        error = "This airport already exists"
+        error = "This airplane already exists"
         return render_template('staffairplane.html', error=error)
     else:
         ins = 'INSERT INTO airport VALUES(%s, %s, %s, %s, %s)'
-        cursor.execute(ins, (code,name, city, country, type))
+        cursor.execute(ins, (airline_name,identification_number, seat_count, manufacturer, manufacture_date))
         conn.commit()
         cursor.close()
         return redirect('/staffairplanelist')
+    

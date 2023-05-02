@@ -1,0 +1,51 @@
+{%extends "staffbase.html"%}
+{%block content%}
+
+<div class="container">
+	<div class="w-100">
+			<div class="card">
+				<div class="card-header">
+					<h5 class="card-title">Register</h5>
+				</div>
+				<div class="card-body">
+					<form action="/staffairplaneAuth" method="POST">
+						<div class="container py 5">
+							<div class="row d-flex justify-content-center align-items-center">
+								<div class="col">
+									<h4>Airport Info</h4>
+                                    <div class="form-group">
+										<label for="airline_name">Airline</label>  
+										<input type="text" class="form-control" id="airline_name" name="airline_name" placeholder="Airline" required>
+									</div>
+									<div class="form-group">
+										<label for="identification_number">Identification Number</label>
+										<input type="text" class="form-control" id="identification_number" name="identification_number" placeholder="ID" required>
+									</div>
+									<div class="form-group">
+										<label for="seat_count">Seats</label>
+										<input type="text" class="form-control" id="seat_count" name="seat_count" placeholder="Seat count" required>
+									</div>
+									<div class="form-group">
+										<label for="manufacturer">Manufacturer</label>
+										<input type="text" class="form-control" id="manufacturer" name="manufacturer" placeholder="Manufacturer" required>
+									</div>
+                                    <div class="form-group">
+										<label for="manufacture_date">Manufacture Date</label>
+										<input type="date" class="form-control" id="manufacture_date" name="manufacture_date" placeholder="Manufacture Date" required>
+									</div>
+                                    
+								</div>
+						</div>
+							<button type="submit" class="btn btn-primary">Register Airplane</button>
+							{% if error %}
+								<br/>
+								<br/>
+								<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{error}}</div>
+							{% endif %}
+
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+{%endblock%}

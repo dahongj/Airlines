@@ -94,12 +94,6 @@ def custloginAuth():
 def custmyflight():
     return render_template('custmyflight.html')
 
-#Go to Logout screen
-@auth.route('/custlogout')
-def custlogout():
-    session.clear()
-    return "<p>Logout<p>"
-
 #Load the customer registration form
 @auth.route('/custregister')
 def custsign_up():
@@ -234,7 +228,7 @@ def staffregisterAuth():
         return render_template('staffregister.html', error=error)
     else:
         ins = 'INSERT INTO airline_staff VALUES(%s, %s, %s, %s, %s, %s, %s, %s)'
-        cursor.execute(ins, (username,password, last_name, first_name, email, phone_number, date_of_birth))
+        cursor.execute(ins, (username, airline, password, last_name, first_name, email, phone_number, date_of_birth))
         conn.commit()
         cursor.close()
         return render_template('stafflogin.html')

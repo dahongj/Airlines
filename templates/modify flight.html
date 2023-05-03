@@ -1,0 +1,94 @@
+{%extends "staffbase.html"%}
+{%block content%}
+
+<div class="container">
+	<div class="w-100">
+			<div class="card">
+				<div class="card-header">
+					<h5 class="card-title">Modify Flight</h5>
+				</div>
+				<div class="card-body">
+					<form action="/flight_added" method="POST">
+						<div class="container py 5">
+							<div class="row d-flex justify-content-center align-items-center">
+									<div class="form-group">
+										<label for="flight_number">Flight Number</label>
+										<input type="text" class="form-control" id="flight_number" name="flight_number" value="{{flight.flight_number}}" disabled>
+									</div>
+							</div>
+							<div class="row d-flex justify-content-center align-items-center">
+								<div class="col">
+									<div class="form-group">
+										<label for="departure_date">Departure Date</label>
+										<input type="date" class="form-control" id="departure_date" name="departure_date" placeholder="departure date" value={{flight.departure_date}} disabled>
+									</div>
+								</div>
+								<div class="col">
+									<div class="form-group">
+										<label for="departure_time">Departure Time</label>
+										<input type="time" class="form-control" id="departure_time" name="departure_time" placeholder="departure time" value={{flight.departure_time}} disabled>
+									</div>
+								</div>
+								<div class="col">
+									<select class="form-select" name="departure_airport_code" id="departure_airport_code" required>
+										<option selected value="{{flight.departure_airport_code}}">{{flight.departure_airport_code}}</option>
+										{% for airport in airports %}
+										{% if airport.name != flight.departure_airport_code %}
+											<option value="{{airport.name}}">{{airport.name}}</option>
+										{% endif %}
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<div class="row d-flex justify-content-center align-items-center">
+								<div class="col">
+									<div class="form-group">
+										<label for="arrival_date">Arrival Date</label>
+										<input type="date" class="form-control" id="arrival_date" name="arrival_date" placeholder="arrival date" required>
+									</div>
+								</div>
+								<div class="col">
+									<div class="form-group">
+										<label for="arrival_time">Arrival Time</label>
+										<input type="time" class="form-control" id="arrival_time" name="arrival_time" placeholder="arrival time" required>
+									</div>
+								</div>
+								<div class="col">
+									<select class="form-select" name="arrival_airport_code" id="arrival_airport_code" required>
+										<option disabled selected>Select Arrival Airport</option>
+										{% for airport in airports %}
+											<option value="{{airport.name}}">{{airport.name}}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="flight_status">Flight Status</label>
+								<input type="text" class="form-control" id="flight_status" name="flight_status" placeholder="flight_status" value="{{flight.flight_status}}" required>
+							</div>
+							<div class="form-group">
+								<label for="base_price">base_price</label>
+								<input type="text" class="form-control" id="base_price" name="base_price" placeholder="base price" value={{flight.base_price}} required>
+							</div>
+							<select class="form-select" name="airplane_id" id="airplane_id" required>
+								<option disabled selected>Select Airplane</option>
+								{% for airplane in airplanes %}
+									<option value="{{airplane.airline_name}}[*]{{airplane.identification_number}}">{{airplane.airline_name}} {{airplane.identification_number}}</option>
+								{% endfor %}
+							</select>
+                                    
+								</div>
+						</div>
+							<button type="submit" class="btn btn-primary">Add Flight</button>
+							{% if error %}
+								<br/>
+								<br/>
+								<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{error}}</div>
+							{% endif %}
+
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+{%endblock%}

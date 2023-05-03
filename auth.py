@@ -393,8 +393,13 @@ def staffflightAuth():
     cursor.execute(query, (airplane_id.split("[*]")[0], airplane_id.split("[*]")[-1]))
     seat_count = cursor.fetchone()
     for i in range(1, seat_count['seat_count']+1):
-        query = 'INSERT INTO ticket VALUES(%s, %s, %s, %s, %s)'
-        cursor.execute(query, (i, flight_num, departure_time, departure_date, base_price))
+        if((seat_count['seat_count']-i)/seat_count['seat_count'] > .2):
+            query = 'INSERT INTO ticket VALUES(%s, %s, %s, %s, %s)'
+            cursor.execute(query, (i, flight_num, departure_time, departure_date, base_price))
+        else:
+            new_price = str(1.25*int(base_price))
+            query = 'INSERT INTO ticket VALUES(%s, %s, %s, %s, %s)'
+            cursor.execute(query, (i, flight_num, departure_time, departure_date, new_price))
     conn.commit()
     cursor.close()
     return redirect('/staffflight')

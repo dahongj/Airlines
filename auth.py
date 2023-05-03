@@ -360,8 +360,8 @@ def staff_add_flight():
     query = 'SELECT * FROM airport'
     cursor.execute(query)
     airports = cursor.fetchall()
-    query = 'SELECT * FROM airplane'
-    cursor.execute(query)
+    query = 'SELECT * FROM airplane WHERE airline_name = %s'
+    cursor.execute(query, session['user']['airline_name'])
     airplanes = cursor.fetchall()
     return render_template('create flight.html', airports = airports, airplanes = airplanes, session=session['user'])
 
@@ -403,3 +403,7 @@ def staffflightAuth():
     conn.commit()
     cursor.close()
     return redirect('/staffflight')
+
+@auth.route('/staffrevenue', methods=['GET', 'POST'])
+def staffrevenue():
+    return render_template('/staffrevenue.html')

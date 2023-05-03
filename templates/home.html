@@ -1,6 +1,6 @@
 {%extends "base.html"%}
 {%block content%}
-{% if name %}
+{% if session %}
     Welcome {{session.first_name}} {{session.last_name}}!
 {% endif %}
 

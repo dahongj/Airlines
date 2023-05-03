@@ -44,7 +44,7 @@ def search():
     cursor.close()
     if 'user' in session:
         return render_template('home.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
-    return render_template('home.html', session=session, flights=flights)
+    return render_template('home.html', session=session['user'], flights=flights)
 
 #Load up customer login form page
 @auth.route('/custlogin')
@@ -54,7 +54,7 @@ def custlogin():
 #Go to customer dashboard, the home page for a customer
 @auth.route('custhome',methods=['GET', 'POST'])
 def custhome():
-    return render_template('custdashboard.html', session=session)
+    return render_template('custdashboard.html', session=session['user'])
 
 #Customer login authentication
 @auth.route('/custloginAuth', methods=['GET', 'POST'])
@@ -76,7 +76,7 @@ def custloginAuth():
     cursor.close()
     if(user):
         session['user'] = {'email': user['email'], 'first_name': user['first_name'], 'last_name': user['last_name']}
-        return render_template('home.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
+        return render_template('home.html', session=session['user'], flights=flights)
 
     cursor = conn.cursor()
     query = 'SELECT email, first_name, last_name FROM customer WHERE email = %s and password = %s'
@@ -85,7 +85,7 @@ def custloginAuth():
 
     if(user):
         session['user'] = {'email': user['email'], 'first_name': user['first_name'], 'last_name': user['last_name']}
-        return render_template('custdashboard.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
+        return render_template('custdashboard.html', session=session['user'], flights=flights)
     else:
         error = 'Invalid login or username'
         return render_template('custlogin.html', error=error)

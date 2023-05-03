@@ -245,7 +245,7 @@ def logout():
     return redirect('/')
 
 #Flight template
-@auth.route('staffflight', methods=['GET', 'POST'])
+@auth.route('/staffflight', methods=['GET', 'POST'])
 def staffflight():
     cursor = conn.cursor()
     query = 'SELECT * FROM Flight WHERE (departure_date > CURRENT_DATE OR (departure_date = CURRENT_DATE AND departure_time >= CURRENT_TIME) AND departure_date <= CURRENT_DATE + 30) AND airline_name = %s'
@@ -253,7 +253,7 @@ def staffflight():
     flights = cursor.fetchall()
 
     cursor.close()
-    return render_template('staffflight.html', flights = flights)
+    return render_template('staffflight.html', flights = flights, session=session['user'])
 
 #Flight search
 @auth.route('/staffsearch', methods=['GET', 'POST'])
@@ -381,8 +381,8 @@ def staffflightAuth():
     base_price = request.form['base_price']
     airplane_id = request.form['airplane_id']
     cursor = conn.cursor()
-    query = 'SELECT * FROM flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s'
-    cursor.execute(query, (flight_num, departure_date, departure_time))
+    query = 'SELECT * FROM flight WHERE airline = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s'
+    cursor.execute(query, (session['user']['airline_name'], flight_num, departure_date, departure_time))
     data = cursor.fetchone()
     if data:
         error = "This flight already exists"
@@ -407,3 +407,22 @@ def staffflightAuth():
 @auth.route('/staffrevenue', methods=['GET', 'POST'])
 def staffrevenue():
     return render_template('/staffrevenue.html')
+
+@auth.route('/staff_manage_flight', methods=['GET', 'POST'])
+def manage_flight():    
+    flight_number = request.form['flight_number']
+    airline_name = request.form['airline_name']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+    cursor = conn.cursor()
+    query = 'SELECT * FROM flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+    cursor.execute(query, (flight_number, departure_date, departure_time, airline_name))
+    flight = cursor.fetchone()
+    query = 'SELECT * FROM airport'
+    cursor.execute(query)
+    airports = cursor.fetchall()
+    query = 'SELECT * FROM airplane WHERE airline_name = %s'
+    cursor.execute(query, (session['user']['airline_name']))
+    airplanes = cursor.fetchall()
+    cursor.close()
+    return render_template('modify flight.html', flight = flight, session=session['user'], airplanes = airplanes, airports = airports)

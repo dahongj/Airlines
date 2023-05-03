@@ -1,4 +1,4 @@
-{%extends "staffbase.html"%}
+{%extends "base.html"%}
 {%block content%}
 
 <div class="container">
@@ -35,6 +35,8 @@
         </div>
     </form>
 </div>
+
+<a class="btn btn-primary" href="/staff_add_flight">Add Flight</a>
 
     {% if flights %}
         {% for flight in flights %}

@@ -36,9 +36,25 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
               <ul class="navbar-nav">
-                {% if session['name'] %}
+                {% if session.airline_name %}
                 <li class="nav-item active">
-                  <a class="nav-link" href="/logout">Logout</a>
+                  <a class="nav-link" href="staffflight">Flights <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="staffinfra">Infrastructure</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="staffrevenue">Revenue</a>
+                </li>
+                {% elif session.email %}
+                <li class="nav-item active">
+                  <a class="nav-link" href="custmyflight">My Flights <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="buyflights">Search Flights</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="custhistory">My History</a>
                 </li>
                 {% else %}
                 <li class="nav-item active">
@@ -46,6 +62,11 @@
                 </li>
                 <li class="nav-item active">
                   <a class="nav-link" href="/stafflogin">Staff Login</a>
+                </li>
+                {% endif %}
+                {% if session.first_name %}
+                <li class="nav-item active">
+                  <a class="nav-link" href="/logout">Logout</a>
                 </li>
                 {% endif %}
               </ul>

@@ -1,7 +1,7 @@
 {%extends "base.html"%}
 {%block content%}
 {% if name %}
-    Welcome {{name}}
+    Welcome {{session.first_name}} {{session.last_name}}!
 {% endif %}
 
 <div class="container">

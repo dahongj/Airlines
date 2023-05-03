@@ -21,7 +21,7 @@ def home():
     flights = cursor.fetchall()
     cursor.close()
     if 'user' in session:
-        return render_template('home.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
+        return render_template('home.html', session=session, flights=flights)
     return render_template('home.html', flights=flights)
 
 #Search function
@@ -44,7 +44,7 @@ def search():
     cursor.close()
     if 'user' in session:
         return render_template('home.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
-    return render_template('home.html', flights=flights)
+    return render_template('home.html', session=session, flights=flights)
 
 #Load up customer login form page
 @auth.route('/custlogin')
@@ -54,7 +54,7 @@ def custlogin():
 #Go to customer dashboard, the home page for a customer
 @auth.route('custhome',methods=['GET', 'POST'])
 def custhome():
-    return render_template('custdashboard.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'])
+    return render_template('custdashboard.html', session=session)
 
 #Customer login authentication
 @auth.route('/custloginAuth', methods=['GET', 'POST'])
@@ -289,7 +289,7 @@ def staffairportlist():
     query = 'SELECT * FROM airport WHERE 1'
     cursor.execute(query)
     airports = cursor.fetchall()
-    return render_template('staffairportlist.html', airports = airports)
+    return render_template('staffairportlist.html', airports = airports, session=session['user'])
 
 #Airport template
 @auth.route('/staffairport', methods=['GET','POST'])
@@ -312,7 +312,7 @@ def staffairportAuth():
     error = None
     if(data):
         error = "This airport already exists"
-        return render_template('staffairport.html', error=error)
+        return render_template('staffairport.html', error=error, session=session['user'])
     else:
         ins = 'INSERT INTO airport VALUES(%s, %s, %s, %s, %s)'
         cursor.execute(ins, (code,name, city, country, type))
@@ -326,7 +326,7 @@ def staffairplanelist():
     query = 'SELECT * FROM airplane WHERE airline_name = %s'
     cursor.execute(query, session['user']['airline_name'])
     airplanes = cursor.fetchall()
-    return render_template('staffairplanelist.html', airplanes = airplanes)
+    return render_template('staffairplanelist.html', airplanes = airplanes, session=session['user'])
 
 @auth.route('/staffairplane', methods=['GET','POST'])
 def staffairplane():
@@ -346,10 +346,55 @@ def staffairplaneAuth():
     error = None
     if(data):
         error = "This airplane already exists"
-        return render_template('staffairplane.html', error=error)
+        return render_template('staffairplane.html', error=error, session=session['user'])
     else:
         ins = 'INSERT INTO airplane VALUES(%s, %s, %s, %s, %s)'
         cursor.execute(ins, (session['user']['airline_name'],identification_number, seat_count, manufacturer, manufacture_date))
         conn.commit()
         cursor.close()
         return redirect('/staffairplanelist')
+
+@auth.route('/staff_add_flight', methods=['GET', 'POST'])
+def staff_add_flight():
+    cursor = conn.cursor()
+    query = 'SELECT * FROM airport'
+    cursor.execute(query)
+    airports = cursor.fetchall()
+    query = 'SELECT * FROM airplane'
+    cursor.execute(query)
+    airplanes = cursor.fetchall()
+    return render_template('create flight.html', airports = airports, airplanes = airplanes, session=session['user'])
+
+# Create a new flight
+@auth.route('/flight_added', methods=['GET', 'POST'])
+def staffflightAuth():
+    departure_airport_code = request.form['departure_airport_code']
+    arrival_airport_code = request.form['arrival_airport_code']
+    if departure_airport_code == arrival_airport_code:
+        error = "Departure and arrival airport cannot be the same"
+        return render_template('create flight.html', error=error, session=session['user'])
+    flight_num = request.form['flight_number']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+    arrival_date = request.form['arrival_date']
+    arrival_time = request.form['arrival_time']
+    base_price = request.form['base_price']
+    airplane_id = request.form['airplane_id']
+    cursor = conn.cursor()
+    query = 'SELECT * FROM flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s'
+    cursor.execute(query, (flight_num, departure_date, departure_time))
+    data = cursor.fetchone()
+    if data:
+        error = "This flight already exists"
+        return render_template('create flight.html', error=error, session=session['user'])
+    query = 'INSERT INTO flight VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+    cursor.execute(query, (flight_num, departure_time, departure_date, departure_airport_code, arrival_date, arrival_time, arrival_airport_code, base_price, "On Time", session['user']['airline_name'], airplane_id.split("[*]")[0], airplane_id.split("[*]")[-1]))
+    query = 'SELECT seat_count FROM airplane WHERE airline_name = %s AND identification_number = %s'
+    cursor.execute(query, (airplane_id.split("[*]")[0], airplane_id.split("[*]")[-1]))
+    seat_count = cursor.fetchone()
+    for i in range(1, seat_count+1):
+        query = 'INSERT INTO ticket VALUES(%s, %s, %s, %s, %s, %s, %s, %s)'
+        cursor.execute(query, (i, flight_num, departure_time, departure_date, base_price))
+    conn.commit()
+    cursor.close()
+    return redirect('/staffflightlist')

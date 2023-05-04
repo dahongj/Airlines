@@ -406,6 +406,7 @@ def staffflightAuth():
 
 @auth.route('/staffrevenue', methods=['GET', 'POST'])
 def staffrevenue():
+
     monthly_rev = 0
     monthly_ticket = 0
     yearly_rev = 0
@@ -414,14 +415,57 @@ def staffrevenue():
     range_ticket = 0
 
     cursor = conn.cursor()
-    query = 'SELECT * FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND purchase_date > CURRENT_DATE - 365'
+    query = 'SELECT * FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND YEAR(purchase_date) = YEAR(CURRENT_DATE) -1'
     cursor.execute(query, session['user']['airline_name'])
-    revenue = cursor.fetchall()
-    for i in revenue:
+    yrevenue = cursor.fetchall()
+    for i in yrevenue:
         yearly_rev += int(i.price)
-        yearly_ticket+= 1
+        yearly_ticket += 1
 
-    return render_template('/staffrevenue.html', yearly_rev = yearly_rev, yearly_ticket=yearly_ticket)
+    query = 'SELECT * FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND MONTH(purchase_date) = MONTH(CURRENT_DATE) - 1'
+    cursor.execute(query, session['user']['airline_name'])
+    mrevenue = cursor.fetchall()
+    for j in mrevenue:
+        monthly_rev += int(j.price)
+        monthly_ticket += 1
+
+    return render_template('/staffrevenue.html', yearly_rev = yearly_rev, yearly_ticket = yearly_ticket, monthly_rev = monthly_rev, monthly_ticket = monthly_ticket, range_rev = range_rev, range_ticket= range_ticket)
+
+@auth.route('/staffrange', methods=['GET', 'POST'])
+def staffrange():
+
+    start = request.form['start']
+    end = request.form['end']
+    monthly_rev = 0
+    monthly_ticket = 0
+    yearly_rev = 0
+    yearly_ticket = 0
+    range_rev = 0
+    range_ticket = 0
+
+    cursor = conn.cursor()
+    query = 'SELECT * FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND YEAR(purchase_date) = YEAR(CURRENT_DATE) -1'
+    cursor.execute(query, session['user']['airline_name'])
+    yrevenue = cursor.fetchall()
+    for i in yrevenue:
+        yearly_rev += int(i.price)
+        yearly_ticket += 1
+
+    query = 'SELECT * FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND MONTH(purchase_date) = MONTH(CURRENT_DATE) - 1'
+    cursor.execute(query, session['user']['airline_name'])
+    mrevenue = cursor.fetchall()
+    for j in mrevenue:
+        monthly_rev += int(j.price)
+        monthly_ticket += 1
+
+    query = 'SELECT * FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND purchase_date BETWEEN {start} AND {end}'
+    cursor.execute(query, (session['user']['airline_name'],start,end))
+    rrevenue = cursor.fetchall()
+    for k in rrevenue:
+        range_rev += int(k.price)
+        range_ticket += 1
+
+    return render_template('/staffrevenue.html', yearly_rev = yearly_rev, yearly_ticket = yearly_ticket, monthly_rev = monthly_rev, monthly_ticket = monthly_ticket, range_rev = range_rev, range_ticket= range_ticket)
 
 @auth.route('/staff_manage_flight', methods=['GET', 'POST'])
 def manage_flight():    

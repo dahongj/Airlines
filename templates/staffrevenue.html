@@ -2,11 +2,35 @@
 {%block content%}
 <div class="card">
     <div class="card-body">
-        <h4 class="card-title">Yearly Revenue</h5>
+        <h4 class="card-title">Previous Year's Revenue</h5>
         <p class="card-text">$ {{yearly_rev}}</p>
         <p class="card-text">Tickets sold: {{yearly_ticket}}</p>
-        <h4 class="card-title">Monthly Revenue</h6>
-        <p class="card-text">$</p>
+        <h4 class="card-title">Previous Month's Revenue</h6>
+        <p class="card-text">$ {{monthly_rev}}</p>
+        <p class="card-text">Tickets sold: {{monthly_ticket}}</p>
+        <h4 class="card-title">Search Range Revenue</h6>
+            <form action="/staffrange" method="POST">
+                <div class="form-group">
+                    <div class ="row">
+                        <div class="form-group">
+                            <label for="start">Start Date</label>
+                            <input type="date" class="form-control" id="start" name="start" placeholder="Start Date">
+                        </div>
+                        <div class="form-group">
+                            <label for="start">End Date</label>
+                            <input type="date" class="form-control" id="end" name="end" placeholder="End Date">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+            </form>
+            
+            <p class="card-text">$ {{range_rev}}</p>
+            <p class="card-text">Tickets sold:{{range_ticket}}</p>
+
     </div>
 </div>
+
 {%endblock%}

@@ -381,7 +381,7 @@ def staffflightAuth():
     base_price = request.form['base_price']
     airplane_id = request.form['airplane_id']
     cursor = conn.cursor()
-    query = 'SELECT * FROM flight WHERE airline = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s'
+    query = 'SELECT * FROM flight WHERE airline_name = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s'
     cursor.execute(query, (session['user']['airline_name'], flight_num, departure_date, departure_time))
     data = cursor.fetchone()
     if data:

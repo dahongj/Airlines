@@ -16,7 +16,7 @@ conn = pymysql.connect(host='localhost',
 def home():
     #cursor created from the conn above
     cursor = conn.cursor()
-    query = 'SELECT * FROM Flight WHERE departure_date > CURRENT_DATE OR (departure_date = CURRENT_DATE AND departure_time >= CURRENT_TIME);'
+    query = 'SELECT * FROM Flight WHERE departure_date >= CURRENT_DATE OR (departure_date = CURRENT_DATE AND departure_time >= CURRENT_TIME);'
     cursor.execute(query)
     flights = cursor.fetchall()
     cursor.close()
@@ -141,7 +141,7 @@ def custregisterAuth():
 @auth.route('/custmyflight', methods=['GET', 'POST'])
 def custmyflight():
     cursor = conn.cursor()
-    query = 'SELECT * FROM customer NATURAL JOIN purchased NATURAL JOIN ticket NATURAL JOIN flight WHERE customer.email = %s'
+    query = 'SELECT * FROM customer NATURAL JOIN purchased NATURAL JOIN ticket NATURAL JOIN flight WHERE customer.email = %s AND departure_date >= CURRENT_DATE + INTERVAL 1 DAY'
     cursor.execute(query, (session['user']['email']))
     flights = cursor.fetchall()
     if 'user' in session:
@@ -151,7 +151,7 @@ def custmyflight():
 def cancelflight():
     cursor = conn.cursor()
     ticket_id = request.form['ticket_id']
-    
+
     query = 'DELETE from purchased where ticket_id = %s'
     cursor.execute(query, ticket_id)
     conn.commit()

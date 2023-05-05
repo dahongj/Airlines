@@ -21,7 +21,7 @@ def home():
     flights = cursor.fetchall()
     cursor.close()
     if 'user' in session:
-        return render_template('home.html', session=session, flights=flights)
+        return render_template('home.html', session=session['user'], flights=flights)
     return render_template('home.html', flights=flights)
 
 #Search function
@@ -43,7 +43,7 @@ def search():
     flights = cursor.fetchall()
     cursor.close()
     if 'user' in session:
-        return render_template('home.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
+        return render_template('home.html', session=session['user'], flights=flights)
     return render_template('home.html', session=session['user'], flights=flights)
 
 #Load up customer login form page
@@ -75,7 +75,7 @@ def custloginAuth():
 
     cursor.close()
     if(user):
-        session['user'] = {'email': user['email'], 'first_name': user['first_name'], 'last_name': user['last_name']}
+        session['user'] = {'email': user['email'], 'first_name': user['first_name'], 'last_name': user['last_name'], 'date_of_birth' : user['date_of_birth']}
         return render_template('home.html', session=session['user'], flights=flights)
 
     cursor = conn.cursor()
@@ -84,15 +84,11 @@ def custloginAuth():
     user = cursor.fetchone()
 
     if(user):
-        session['user'] = {'email': user['email'], 'first_name': user['first_name'], 'last_name': user['last_name']}
+        session['user'] = {'email': user['email'], 'first_name': user['first_name'], 'last_name': user['last_name'], 'date_of_birth' : user['date_of_birth']}
         return render_template('custdashboard.html', session=session['user'], flights=flights)
     else:
         error = 'Invalid login or username'
         return render_template('custlogin.html', error=error)
-
-@auth.route('/custmyflight')
-def custmyflight():
-    return render_template('custmyflight.html')
 
 #Load the customer registration form
 @auth.route('/custregister')
@@ -143,26 +139,86 @@ def custregisterAuth():
         return render_template('custlogin.html')
 
 @auth.route('/custmyflight', methods=['GET', 'POST'])
-def myflight():
+def custmyflight():
     cursor = conn.cursor()
     query = 'SELECT * FROM customer NATURAL JOIN purchased NATURAL JOIN ticket NATURAL JOIN flight WHERE customer.email = %s'
     cursor.execute(query, (session['user']['email']))
     flights = cursor.fetchall()
-    return render_template('custmyflight.html', flights = flights)
+    if 'user' in session:
+        return render_template('custmyflight.html', session=session['user'],flights = flights)
 
-@auth.route('/purchase/{{flight_number}}', methods=['GET', 'POST'])
-def buyflights():
-    flight_number = request.form['flight_number']
+@auth.route('/cancelflight', methods=['GET', 'POST'])
+def cancelflight():
     cursor = conn.cursor()
-    query = 'SELECT * FROM flight WHERE flight_number = %s'
-    cursor.execute(query, (flight_number))
-    flight = cursor.fetchone()
+    ticket_id = request.form['ticket_id']
+    
+    query = 'DELETE from purchased where ticket_id = %s'
+    cursor.execute(query, ticket_id)
+    conn.commit()
+    cursor.close()
 
-    return render_template('buyflights.html', flight=flight)
+    if 'user' in session:
+        return redirect('\custmyflight')
+
+@auth.route('/buyflights', methods=['GET', 'POST'])
+def buyflights():
+    cursor = conn.cursor()
+    query = 'SELECT * FROM Flight WHERE departure_date > CURRENT_DATE OR (departure_date = CURRENT_DATE AND departure_time >= CURRENT_TIME);'
+    cursor.execute(query)
+    flights = cursor.fetchall()
+    cursor.close()
+    if 'user' in session:
+        return render_template('buyflights.html', session=session['user'], flights=flights)
+
+@auth.route('/purchaseflight', methods=['GET', 'POST'])
+def purchaseflight():
+    flight_number = request.form['flight_number']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+
+    cursor = conn.cursor()
+    query = 'SELECT * from ticket WHERE flight_number = %s  AND departure_date = %s AND departure_time = %s AND NOT EXISTS(SELECT ticket_id from purchased WHERE purchased.ticket_id = ticket.ticket_id)'
+    cursor.execute(query,(flight_number,departure_date,departure_time))
+    tickets = cursor.fetchall()
+    cursor.close()
+    return render_template('tickets.html',session=session['user'],flight_number=flight_number,departure_date=departure_date,departure_time=departure_time, tickets = tickets)
+
+@auth.route('/purchaseticket', methods=['GET', 'POST'])
+def purchaseticket():
+    email = session['user']['email']
+    last_name = session['user']['last_name']
+    first_name = session['user']['first_name']
+    dob = session['user']['last_name']
+    flight_number = request.form['flight_number']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+    card_type = request.form['card_type']
+    card_number = request.form['card_number']
+    expiration_date = request.form['exp_date']
+    name_on_card = request.form['noc']
+    amount = int(request.form['amount'])
+
+    cursor = conn.cursor()
+    query = 'SELECT * from ticket WHERE flight_number = %s  AND departure_date = %s AND departure_time = %s AND NOT EXISTS(SELECT ticket_id from purchased WHERE purchased.ticket_id = ticket.ticket_id)'
+    cursor.execute(query,(flight_number,departure_date,departure_time))
+    tickets = cursor.fetchall()
+
+    for ticket in tickets:
+        if amount > 0:
+            query = 'INSERT INTO purchased(email,ticket_id,rider_last_name,rider_first_name,rider_dob,card_type,card_number,expiration_date,name_on_card,purchase_time,purchase_date) VALUES(%s, %s, %s, %s, %s, %s, %s,%s, %s, CURRENT_TIME, CURRENT_DATE)'
+            ticket_id = ticket['ticket_id']
+            cursor.execute(query,(email,ticket_id,last_name,first_name,dob,card_type,card_number,expiration_date,name_on_card))
+            amount -= 1 
+        else:
+            break
+    conn.commit()
+    cursor.close()
+    return redirect('/custmyflight')
 
 @auth.route('/custhistory', methods=['GET', 'POST'])
 def custhistory():
-    return render_template('/custhistory.html')
+    if 'user' in session:
+        return render_template('/custhistory.html',session=session['user'])
 ############################ STAFF ##############################
 #Login template
 @auth.route('/stafflogin', methods=['GET', 'POST'])
@@ -236,7 +292,7 @@ def staffregisterAuth():
 #Homepage template
 @auth.route('/staffhome',methods=['GET', 'POST'])
 def staffhome():
-    return render_template('staffdashboard.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'])
+    return render_template('staffdashboard.html', session = session['user'])
 
 @auth.route('/logout')
 def logout():
@@ -274,14 +330,14 @@ def staffsearch():
     flights = cursor.fetchall()
     cursor.close()
     if 'user' in session:
-        return render_template('staffflight.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'], flights=flights)
+        return render_template('staffflight.html', session=session['user'], flights=flights)
     return render_template('staffflight.html', flights=flights)
 
 #INFRASTRUCTURE
 #template
 @auth.route('/staffinfra', methods=['GET', 'POST'])
 def staffinfra():
-    return render_template('staffinfra.html')
+    return render_template('staffinfra.html',session=session['user'])
 
 @auth.route('/staffairportlist', methods=['GET', 'POST'])
 def staffairportlist():
@@ -294,7 +350,7 @@ def staffairportlist():
 #Airport template
 @auth.route('/staffairport', methods=['GET','POST'])
 def staffairport():
-    return render_template('staffairport.html')
+    return render_template('staffairport.html', session=session['user'])
 
 #Airport authorization
 @auth.route('/staffairportAuth', methods=['GET','POST'])
@@ -330,7 +386,7 @@ def staffairplanelist():
 
 @auth.route('/staffairplane', methods=['GET','POST'])
 def staffairplane():
-    return render_template('staffairplane.html')
+    return render_template('staffairplane.html',session=session['user'])
 
 @auth.route('/staffairplaneAuth', methods=['GET','POST'])
 def staffairplaneAuth():
@@ -429,7 +485,7 @@ def staffrevenue():
         monthly_rev += int(j.price)
         monthly_ticket += 1
 
-    return render_template('/staffrevenue.html', yearly_rev = yearly_rev, yearly_ticket = yearly_ticket, monthly_rev = monthly_rev, monthly_ticket = monthly_ticket, range_rev = range_rev, range_ticket= range_ticket)
+    return render_template('/staffrevenue.html', yearly_rev = yearly_rev, yearly_ticket = yearly_ticket, monthly_rev = monthly_rev, monthly_ticket = monthly_ticket, range_rev = range_rev, range_ticket= range_ticket, session=session['user'])
 
 @auth.route('/staffrange', methods=['GET', 'POST'])
 def staffrange():
@@ -465,7 +521,7 @@ def staffrange():
         range_rev += int(k.price)
         range_ticket += 1
 
-    return render_template('/staffrevenue.html', yearly_rev = yearly_rev, yearly_ticket = yearly_ticket, monthly_rev = monthly_rev, monthly_ticket = monthly_ticket, range_rev = range_rev, range_ticket= range_ticket)
+    return render_template('/staffrevenue.html', yearly_rev = yearly_rev, yearly_ticket = yearly_ticket, monthly_rev = monthly_rev, monthly_ticket = monthly_ticket, range_rev = range_rev, range_ticket= range_ticket,session=session['user'])
 
 @auth.route('/staff_manage_flight', methods=['GET', 'POST'])
 def manage_flight():    

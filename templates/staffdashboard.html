@@ -1,7 +1,7 @@
-{%extends "staffbase.html"%}
+{%extends "base.html"%}
 {%block content%}
-{% if name %}
-    Welcome {{name}}
+{% if session %}
+    Welcome {{session.first_name}} {{session.last_name}}
 {% endif %}
 
 <div class = "card">

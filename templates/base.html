@@ -30,7 +30,13 @@
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            {% if session.airline_name %}
+            <a class="navbar-brand" href="staffhome">Airline</a>
+            {% elif session.email %}
+            <a class="navbar-brand" href="custhome">Airline</a>
+            {% else %}
             <a class="navbar-brand" href="/">Airline</a>
+            {% endif %}
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
@@ -41,20 +47,20 @@
                   <a class="nav-link" href="/staffflight">Flights <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="staffinfra">Infrastructure</a>
+                  <a class="nav-link" href="/staffinfra">Infrastructure</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="staffrevenue">Revenue</a>
+                  <a class="nav-link" href="/staffrevenue">Revenue</a>
                 </li>
                 {% elif session.email %}
                 <li class="nav-item active">
-                  <a class="nav-link" href="custmyflight">My Flights <span class="sr-only">(current)</span></a>
+                  <a class="nav-link" href="/custmyflight">My Flights <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="buyflights">Search Flights</a>
+                  <a class="nav-link" href="/buyflights">Search Flights</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="custhistory">My History</a>
+                  <a class="nav-link" href="/custhistory">My History</a>
                 </li>
                 {% else %}
                 <li class="nav-item active">

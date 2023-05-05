@@ -1,7 +1,61 @@
-{%extends "custbase.html"%}
+{%extends "base.html"%}
 {%block content%}
-{% if name %}
-    Welcome {{name}}
-{% endif %}
 
+
+<div class="container">
+    <form action="/search" method="POST">
+        <div class="form-group">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" role="switch" id="roundTrip">
+                <label class="form-check-label" for="flexSwitchCheckDefault">Only Round Trips</label>
+            </div>
+            
+            <div class="row">
+                <div class="col">
+                    <select class="form-select" name="departure search area" id="departure search area">
+                        <option selected value="name">Departure Airport</option>
+                        <option value="city">Departure City</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <input type="search" class="form-control" id="departure query" name="departure query" placeholder="Search">
+                </div>
+                <div class="col">
+                    <select class="form-select" name="arrival search area" id="arrival search area">
+                        <option value="name">Destination Airport</option>
+                        <option value="city">Destination City</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <input type="search" class="form-control" id="arrival query" name="arrival query" placeholder="Search">
+                </div>
+                <div class="col">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% if flights %}
+    {% for flight in flights %}
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Flight {{flight.flight_number}}</h5>
+                <h5 class="card-title">{{flight.departure_airport_code}} to {{flight.arrival_airport_code}}</h5>
+                <h7 class="card-subtitle mb-2 text-muted">{{flight.departure_date}} | {{flight.departure_time}} - {{flight.arrival_date}} | {{flight.arrival_time}}</h6>
+                <p class="card-text">Base Price(May vary due to availability): {{flight.base_price}}</p>
+                {% if session.email %}
+                    <form action="/purchaseflight" method="POST">
+                        <input type="hidden" name="flight_number" value="{{flight.flight_number}}">
+                        <input type="hidden" name="airline_name" value="{{flight.airline_name}}">
+                        <input type="hidden" name="departure_date" value="{{flight.departure_date}}">
+                        <input type="hidden" name="departure_time" value="{{flight.departure_time}}">
+
+                        <button type="submit" class="btn btn-primary">Buy</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
 {%endblock%}

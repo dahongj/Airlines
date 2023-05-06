@@ -33,10 +33,17 @@
     </div>
 </div>
 
+
+{% if customers %} 
+<div class="card">
+<h4 class="card-title">Top 5 Customers</h6>
 {% for customer in customers%}
 <div class="card">
     Flights: {{customer.num_flights}}<br>
     email: {{customer.email}}
 </div>
 {%endfor%}
+</div>
+{% endif %}
+</div>
 {%endblock%}

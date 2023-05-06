@@ -55,10 +55,15 @@
                     </form>
                     <form action="/view_review" method="POST">
                         <input type="hidden" name="flight_number" value="{{flight.flight_number}}">
-                        <input type="hidden" name="airline_name" value="{{flight.airline_name}}">
                         <input type="hidden" name="departure_date" value="{{flight.departure_date}}">
                         <input type="hidden" name="departure_time" value="{{flight.departure_time}}">
                         <button type="submit" class="btn btn-primary">Reviews </button>
+                    </form>
+                    <form action="/view_customers" method="POST">
+                        <input type="hidden" name="flight_number" value="{{flight.flight_number}}">
+                        <input type="hidden" name="departure_date" value="{{flight.departure_date}}">
+                        <input type="hidden" name="departure_time" value="{{flight.departure_time}}">
+                        <button type="submit" class="btn btn-primary">View Customers </button>
                     </form>
                 </div>
             </div>

@@ -608,3 +608,17 @@ def view_review():
     avg = cursor.fetchone()
     cursor.close()
     return render_template('view_review.html',session=session['user'], reviews= reviews, avg = int(avg['avg_rating']))
+
+@auth.route('/view_customers', methods=['GET', 'POST'])
+def view_customers():
+    flight_number = request.form['flight_number']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+
+    cursor = conn.cursor()
+    query = 'SELECT DISTINCT email FROM purchased INNER JOIN ticket WHERE flight_number = %s AND departure_date = %s AND  departure_time = %s '
+    cursor.execute(query,(flight_number,departure_date,departure_time))
+    customers = cursor.fetchall()
+
+
+    return render_template('view_customers.html',session=session['user'], customers= customers[0])

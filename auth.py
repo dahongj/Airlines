@@ -645,3 +645,62 @@ def view_customers():
 
 
     return render_template('view_customers.html',session=session['user'], customers= customers)
+
+
+@auth.route('/custfinance', methods=['GET', 'POST'])
+def custrevenue():
+
+    monthly_rev = 0
+    monthly_ticket = 0
+    yearly_rev = 0
+    yearly_ticket = 0
+    range_rev = 0
+    range_ticket = 0
+
+    cursor = conn.cursor()
+    query = 'SELECT sum(price) AS revenue, COUNT(*) AS sales FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE email=%s AND purchased.purchase_date >= DATE_SUB(NOW(), INTERVAL 1 YEAR)'
+    cursor.execute(query, session['user']['email'])
+    yrevenue = cursor.fetchone()
+    yearly_rev = yrevenue['revenue']
+    yearly_ticket = yrevenue['sales']
+
+    query = 'SELECT sum(price) AS revenue, COUNT(*) AS sales FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE email = %s AND purchased.purchase_date >= DATE_SUB(NOW(), INTERVAL 1 MONTH)'
+    cursor.execute(query, session['user']['email'])
+    mrevenue = cursor.fetchone()
+    monthly_rev = mrevenue['revenue']
+    monthly_ticket = mrevenue['sales']
+
+    return render_template('/custfinance.html', yearly_rev = yearly_rev, yearly_ticket = yearly_ticket, monthly_rev = monthly_rev, monthly_ticket = monthly_ticket, range_rev = range_rev, range_ticket= range_ticket, session=session['user'])
+
+@auth.route('/custrange', methods=['GET', 'POST'])
+def custrange():
+
+    start = request.form['start']
+    end = request.form['end']
+    monthly_rev = 0
+    monthly_ticket = 0
+    yearly_rev = 0
+    yearly_ticket = 0
+    range_rev = 0
+    range_ticket = 0
+
+    cursor = conn.cursor()
+    'SELECT sum(price) AS revenue, COUNT(*) AS sales FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE email = %s AND purchased.purchase_date >= DATE_SUB(NOW(), INTERVAL 1 YEAR)'
+    cursor.execute(query, session['user']['email'])
+    yrevenue = cursor.fetchone()
+    yearly_rev = yrevenue['revenue']
+    yearly_ticket = yrevenue['sales']
+
+    query = 'SELECT sum(price) AS revenue, COUNT(*) AS sales FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE email = %s AND purchased.purchase_date >= DATE_SUB(NOW(), INTERVAL 1 MONTH)'
+    cursor.execute(query, session['user']['email'])
+    mrevenue = cursor.fetchone()
+    monthly_rev = mrevenue['revenue']
+    monthly_ticket = mrevenue['sales']
+
+    query = 'SELECT sum(price) AS revenue, COUNT(*) AS sales FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE email = %s AND purchase_date BETWEEN {start} AND {end}'
+    cursor.execute(query, (session['user']['email'],start,end))
+    rrevenue = cursor.fetchone()
+    range_rev = rrevenue['revenue']
+    range_ticket = rrevenue['sales']
+
+    return render_template('/custfinance.html', yearly_rev = yearly_rev, yearly_ticket = yearly_ticket, monthly_rev = monthly_rev, monthly_ticket = monthly_ticket, range_rev = range_rev, range_ticket= range_ticket,session=session['user'])

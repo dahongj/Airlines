@@ -533,7 +533,11 @@ def staffrevenue():
     monthly_rev = mrevenue['revenue']
     monthly_ticket = mrevenue['sales']
 
-    return render_template('/staffrevenue.html', yearly_rev = yearly_rev, yearly_ticket = yearly_ticket, monthly_rev = monthly_rev, monthly_ticket = monthly_ticket, range_rev = range_rev, range_ticket= range_ticket, session=session['user'])
+    query = 'SELECT Customer.email, COUNT(DISTINCT Flight.flight_number) AS num_flights FROM Customer JOIN Purchased ON Customer.email = Purchased.email JOIN Ticket ON Purchased.ticket_id = Ticket.ticket_id JOIN Flight ON Ticket.flight_number = Flight.flight_number AND Ticket.departure_date = Flight.departure_date AND Ticket.departure_time = Flight.departure_time GROUP BY Customer.email ORDER BY num_flights'
+    cursor.execute(query)
+    customers = cursor.fetchall()
+
+    return render_template('/staffrevenue.html', yearly_rev = yearly_rev, yearly_ticket = yearly_ticket, monthly_rev = monthly_rev, monthly_ticket = monthly_ticket, range_rev = range_rev, range_ticket= range_ticket, session=session['user'], customers=customers)
 
 @auth.route('/staffrange', methods=['GET', 'POST'])
 def staffrange():
@@ -548,28 +552,29 @@ def staffrange():
     range_ticket = 0
 
     cursor = conn.cursor()
-    query = 'SELECT * FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND YEAR(purchase_date) = YEAR(CURRENT_DATE) -1'
+    'SELECT sum(price) AS revenue, COUNT(*) AS sales FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND purchased.purchase_date >= DATE_SUB(NOW(), INTERVAL 1 YEAR)'
     cursor.execute(query, session['user']['airline_name'])
-    yrevenue = cursor.fetchall()
-    for i in yrevenue:
-        yearly_rev += int(i.price)
-        yearly_ticket += 1
+    yrevenue = cursor.fetchone()
+    yearly_rev = yrevenue['revenue']
+    yearly_ticket = yrevenue['sales']
 
-    query = 'SELECT * FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND MONTH(purchase_date) = MONTH(CURRENT_DATE) - 1'
+    query = 'SELECT sum(price) AS revenue, COUNT(*) AS sales FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND purchased.purchase_date >= DATE_SUB(NOW(), INTERVAL 1 MONTH)'
     cursor.execute(query, session['user']['airline_name'])
-    mrevenue = cursor.fetchall()
-    for j in mrevenue:
-        monthly_rev += int(j.price)
-        monthly_ticket += 1
+    mrevenue = cursor.fetchone()
+    monthly_rev = mrevenue['revenue']
+    monthly_ticket = mrevenue['sales']
 
-    query = 'SELECT * FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND purchase_date BETWEEN {start} AND {end}'
+    query = 'SELECT sum(price) AS revenue, COUNT(*) AS sales FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND purchase_date BETWEEN {start} AND {end}'
     cursor.execute(query, (session['user']['airline_name'],start,end))
-    rrevenue = cursor.fetchall()
-    for k in rrevenue:
-        range_rev += int(k.price)
-        range_ticket += 1
+    rrevenue = cursor.fetchone()
+    range_rev = rrevenue['revenue']
+    range_ticket = rrevenue['sales']
 
-    return render_template('/staffrevenue.html', yearly_rev = yearly_rev, yearly_ticket = yearly_ticket, monthly_rev = monthly_rev, monthly_ticket = monthly_ticket, range_rev = range_rev, range_ticket= range_ticket,session=session['user'])
+    query = 'SELECT Customer.email, COUNT(DISTINCT Flight.flight_number) AS num_flights FROM Customer JOIN Purchased ON Customer.email = Purchased.email JOIN Ticket ON Purchased.ticket_id = Ticket.ticket_id JOIN Flight ON Ticket.flight_number = Flight.flight_number AND Ticket.departure_date = Flight.departure_date AND Ticket.departure_time = Flight.departure_time GROUP BY Customer.email ORDER BY num_flights'
+    cursor.execute(query)
+    customers = cursor.fetchall()
+
+    return render_template('/staffrevenue.html', yearly_rev = yearly_rev, yearly_ticket = yearly_ticket, monthly_rev = monthly_rev, monthly_ticket = monthly_ticket, range_rev = range_rev, range_ticket= range_ticket,session=session['user'], customers=customers)
 
 @auth.route('/staff_manage_flight', methods=['GET', 'POST'])
 def manage_flight():    

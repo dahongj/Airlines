@@ -33,4 +33,10 @@
     </div>
 </div>
 
+{% for customer in customers%}
+<div class="card">
+    Flights: {{customer.num_flights}}<br>
+    email: {{customer.email}}
+</div>
+{%endfor%}
 {%endblock%}

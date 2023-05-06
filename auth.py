@@ -69,7 +69,7 @@ def custloginAuth():
     flights = cursor.fetchall()
 
     #legacy code since our test cases aren't encrypted
-    query = 'SELECT email, first_name, last_name FROM customer WHERE email = %s and password = %s'
+    query = 'SELECT email, first_name, last_name, date_of_birth FROM customer WHERE email = %s and password = %s'
     cursor.execute(query, (email, password))
     user = cursor.fetchone()
 
@@ -79,13 +79,13 @@ def custloginAuth():
         return render_template('home.html', session=session['user'], flights=flights)
 
     cursor = conn.cursor()
-    query = 'SELECT email, first_name, last_name FROM customer WHERE email = %s and password = %s'
+    query = 'SELECT email, first_name, last_name, date_of_birth  FROM customer WHERE email = %s and password = %s'
     cursor.execute(query, (email, md5(password.encode()).hexdigest()))
     user = cursor.fetchone()
 
     if(user):
         session['user'] = {'email': user['email'], 'first_name': user['first_name'], 'last_name': user['last_name'], 'date_of_birth' : user['date_of_birth']}
-        return render_template('custdashboard.html', session=session['user'], flights=flights)
+        return render_template('home.html', session=session['user'], flights=flights)
     else:
         error = 'Invalid login or username'
         return render_template('custlogin.html', error=error)
@@ -141,7 +141,7 @@ def custregisterAuth():
 @auth.route('/custmyflight', methods=['GET', 'POST'])
 def custmyflight():
     cursor = conn.cursor()
-    query = 'SELECT * FROM customer NATURAL JOIN purchased NATURAL JOIN ticket NATURAL JOIN flight WHERE customer.email = %s AND departure_date >= CURRENT_DATE + INTERVAL 1 DAY'
+    query = 'SELECT * FROM customer NATURAL JOIN purchased NATURAL JOIN ticket NATURAL JOIN flight WHERE customer.email = %s AND ((departure_date = CURRENT_DATE + 1 AND departure_time >= CURRENT_TIME) OR departure_date >= CURRENT_DATE + 2)'
     cursor.execute(query, (session['user']['email']))
     flights = cursor.fetchall()
     if 'user' in session:
@@ -218,7 +218,57 @@ def purchaseticket():
 @auth.route('/custhistory', methods=['GET', 'POST'])
 def custhistory():
     if 'user' in session:
-        return render_template('/custhistory.html',session=session['user'])
+        cursor = conn.cursor()
+        query = 'SELECT * from purchased NATURAL JOIN ticket WHERE email = %s AND departure_date < CURRENT_DATE OR (departure_date = CURRENT_DATE AND departure_time < CURRENT_TIME)'
+        cursor.execute(query,(session['user']['email']))
+        flights = cursor.fetchall()
+        cursor.close()
+        return render_template('/custhistory.html',session=session['user'],flights=flights)
+    
+@auth.route('/rate', methods=['GET', 'POST'])
+def rate():
+    flight_number = request.form['flight_number']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+
+    cursor = conn.cursor()
+    query = 'SELECT * from reviews WHERE email = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s'
+    cursor.execute(query, (session['user']['email'],flight_number,departure_date,departure_time))
+    reviews = cursor.fetchall()
+
+    for review in reviews:
+        rating = review['rating']
+        comment = review['comment']
+
+    if len(reviews) != 0:
+        return  render_template('/rate.html',session=session['user'], flight_number=flight_number,departure_date=departure_date,departure_time=departure_time,rating=rating,comment=comment)
+    else:
+        return  render_template('/rate.html',session=session['user'], flight_number=flight_number,departure_date=departure_date,departure_time=departure_time)
+    
+@auth.route('/create_rating', methods=['GET', 'POST'])
+def create_rating():
+    flight_number = request.form['flight_number']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+    rating = request.form['rating']
+    comment = request.form['comment']
+
+    cursor = conn.cursor()
+    query = 'SELECT * from reviews WHERE email = %s AND flight_number = %s AND departure_date = %s AND  departure_time = %s'
+    cursor.execute(query, (session['user']['email'],flight_number,departure_date,departure_time))
+    reviews = cursor.fetchall()
+
+    if(len(reviews) != 0):
+        query = 'DELETE from reviews WHERE email = %s AND flight_number = %s AND departure_date = %s AND  departure_time = %s'
+        cursor.execute(query, (session['user']['email'],flight_number,departure_date,departure_time))
+        conn.commit()
+
+    query = 'INSERT INTO reviews(email,flight_number,departure_date,departure_time,rating,comment) VALUES(%s,%s,%s,%s,%s,%s)'
+    cursor.execute(query, (session['user']['email'],flight_number,departure_date,departure_time,rating,comment))
+    conn.commit()
+    cursor.close()
+    return  redirect('/custhistory')
+    
 ############################ STAFF ##############################
 #Login template
 @auth.route('/stafflogin', methods=['GET', 'POST'])
@@ -240,7 +290,7 @@ def staffloginAuth():
         session['user'] = {'username': user['username'], 'first_name': user['first_name'], 'last_name': user['last_name'],
                             'airline_name': user['airline_name'], 'email': user['email'], 'phone_number' : user['phone_number'],
                             'date_of_birth': user['date_of_birth']}
-        return render_template('staffdashboard.html', name=session['user']['first_name'] + ' ' + session['user']['last_name'])
+        return render_template('staffdashboard.html', session = session['user'],name=session['user']['first_name'] + ' ' + session['user']['last_name'])
     else:
         error = 'Invalid login or username'
         return render_template('stafflogin.html', error=error)
@@ -541,3 +591,4 @@ def manage_flight():
     airplanes = cursor.fetchall()
     cursor.close()
     return render_template('modify flight.html', flight = flight, session=session['user'], airplanes = airplanes, airports = airports)
+

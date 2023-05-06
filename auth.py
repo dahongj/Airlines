@@ -619,4 +619,4 @@ def view_customers():
     customers = cursor.fetchall()
 
 
-    return render_template('view_customers.html',session=session['user'], customers= customers[0])
+    return render_template('view_customers.html',session=session['user'], customers= customers)

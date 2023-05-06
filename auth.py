@@ -592,3 +592,19 @@ def manage_flight():
     cursor.close()
     return render_template('modify flight.html', flight = flight, session=session['user'], airplanes = airplanes, airports = airports)
 
+@auth.route('/view_review', methods=['GET', 'POST'])
+def view_review():
+    flight_number = request.form['flight_number']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+
+    cursor = conn.cursor()
+    query = 'SELECT * FROM reviews WHERE flight_number = %s AND departure_date = %s AND  departure_time = %s '
+    cursor.execute(query,(flight_number,departure_date,departure_time))
+    reviews = cursor.fetchall()
+
+    query = 'SELECT AVG(rating) as avg_rating FROM reviews WHERE flight_number = %s AND departure_date = %s AND  departure_time = %s '
+    cursor.execute(query,(flight_number,departure_date,departure_time))
+    avg = cursor.fetchone()
+    cursor.close()
+    return render_template('view_review.html',session=session['user'], reviews= reviews, avg = int(avg['avg_rating']))

@@ -1,0 +1,17 @@
+{%extends "base.html"%}
+{%block content%}
+
+    Average Rating = {{avg}}
+
+    {% if reviews %}
+            {% for review in reviews %}
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Comment: {{review.comment}}</h5>
+                    <p class="card-text">Rating: {{review.rating}}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+{%endblock%}

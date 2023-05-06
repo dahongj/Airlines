@@ -5,7 +5,8 @@
             {% for customer in customers %}
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title">Customer: {{customer.email}}</h5>
+                    <h4 class="card-title">Customer: {{customer.first_name}} {{customer.last_name}}</h4>
+                    <p class="card-text">Email: {{customer.email}}</p>
                 </div>
             </div>
         {% endfor %}

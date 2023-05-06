@@ -619,7 +619,7 @@ def view_customers():
     departure_time = request.form['departure_time']
 
     cursor = conn.cursor()
-    query = 'SELECT DISTINCT email FROM purchased INNER JOIN ticket WHERE flight_number = %s AND departure_date = %s AND  departure_time = %s '
+    query = 'SELECT DISTINCT customer.email, customer.first_name, customer.last_name FROM purchased INNER JOIN ticket INNER JOIN customer ON purchased.email=customer.email WHERE flight_number = %s AND departure_date = %s AND  departure_time = %s '
     cursor.execute(query,(flight_number,departure_date,departure_time))
     customers = cursor.fetchall()
 

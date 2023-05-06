@@ -47,7 +47,13 @@
                 <h7 class="card-subtitle mb-2 text-muted">{{flight.departure_date}} | {{flight.departure_time}} - {{flight.arrival_date}} | {{flight.arrival_time}}</h6>
                 <p class="card-text">Price: {{flight.base_price}}</p>
                 {% if session.email %}
-                    <a href="/book/{{flight.flight_number}}" class="card-link">Book</a>
+                <form action="/purchaseflight" method="POST">
+                    <input type="hidden" name="flight_number" value="{{flight.flight_number}}">
+                    <input type="hidden" name="airline_name" value="{{flight.airline_name}}">
+                    <input type="hidden" name="departure_date" value="{{flight.departure_date}}">
+                    <input type="hidden" name="departure_time" value="{{flight.departure_time}}">
+                    <button type="submit" class="btn btn-primary">Book</button>
+                </form>
                 {% endif %}
             </div>
         </div>

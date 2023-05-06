@@ -521,19 +521,17 @@ def staffrevenue():
     range_ticket = 0
 
     cursor = conn.cursor()
-    query = 'SELECT * FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND YEAR(purchase_date) = YEAR(CURRENT_DATE) -1'
+    query = 'SELECT sum(price) AS revenue, COUNT(*) AS sales FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND purchased.purchase_date >= DATE_SUB(NOW(), INTERVAL 1 YEAR)'
     cursor.execute(query, session['user']['airline_name'])
-    yrevenue = cursor.fetchall()
-    for i in yrevenue:
-        yearly_rev += int(i.price)
-        yearly_ticket += 1
+    yrevenue = cursor.fetchone()
+    yearly_rev = yrevenue['revenue']
+    yearly_ticket = yrevenue['sales']
 
-    query = 'SELECT * FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND MONTH(purchase_date) = MONTH(CURRENT_DATE) - 1'
+    query = 'SELECT sum(price) AS revenue, COUNT(*) AS sales FROM ticket JOIN purchased ON ticket.ticket_id=purchased.ticket_id JOIN flight ON ticket.flight_number=flight.flight_number WHERE airline_name = %s AND purchased.purchase_date >= DATE_SUB(NOW(), INTERVAL 1 MONTH)'
     cursor.execute(query, session['user']['airline_name'])
-    mrevenue = cursor.fetchall()
-    for j in mrevenue:
-        monthly_rev += int(j.price)
-        monthly_ticket += 1
+    mrevenue = cursor.fetchone()
+    monthly_rev = mrevenue['revenue']
+    monthly_ticket = mrevenue['sales']
 
     return render_template('/staffrevenue.html', yearly_rev = yearly_rev, yearly_ticket = yearly_ticket, monthly_rev = monthly_rev, monthly_ticket = monthly_ticket, range_rev = range_rev, range_ticket= range_ticket, session=session['user'])
 

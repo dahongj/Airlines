@@ -510,6 +510,26 @@ def staffflightAuth():
     cursor.close()
     return redirect('/staffflight')
 
+@auth.route('/flight_changed', methods=['GET', 'POST'])
+def staffflightchangeAuth():
+    departure_airport_code = request.form['departure_airport_code']
+    arrival_airport_code = request.form['arrival_airport_code']
+    if departure_airport_code == arrival_airport_code:
+        error = "Departure and arrival airport cannot be the same"
+        return render_template('create flight.html', error=error, session=session['user'])
+    flight_num = request.form['flight_number']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+    arrival_date = request.form['arrival_date']
+    arrival_time = request.form['arrival_time']
+    base_price = request.form['base_price']
+    status = request.form['flight_status']
+    airplane_id = request.form['airplane_id']
+    cursor = conn.cursor()
+    query = 'UPDATE flight SET departure_airport_code = %s, arrival_airport_code = %s, arrival_date = %s, arrival_time = %s, flight_status = %s WHERE airline_name = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s'
+    cursor.execute(query, (departure_airport_code, arrival_airport_code, arrival_date, arrival_time, status, session['user']['airline_name'], flight_num, departure_date, departure_time))
+    return redirect('/staffflight')
+
 @auth.route('/staffrevenue', methods=['GET', 'POST'])
 def staffrevenue():
 

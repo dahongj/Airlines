@@ -8,7 +8,7 @@
 					<h5 class="card-title">Modify Flight</h5>
 				</div>
 				<div class="card-body">
-					<form action="/flight_added" method="POST">
+					<form action="/flight_changed" method="POST">
 						<div class="container py 5">
 							<div class="row d-flex justify-content-center align-items-center">
 									<div class="form-group">
@@ -44,7 +44,7 @@
 								<div class="col">
 									<div class="form-group">
 										<label for="arrival_date">Arrival Date</label>
-										<input type="date" class="form-control" id="arrival_date" name="arrival_date" placeholder="arrival date" required>
+										<input type="date" class="form-control" id="arrival_date" name="arrival_date" placeholder="arrival date" value="{{flight.arrival_date}}" required>
 									</div>
 								</div>
 								<div class="col">
@@ -68,13 +68,10 @@
 							</div>
 							<div class="form-group">
 								<label for="base_price">base_price</label>
-								<input type="text" class="form-control" id="base_price" name="base_price" placeholder="base price" value={{flight.base_price}} required>
+								<input type="text" class="form-control" id="base_price" name="base_price" placeholder="base price" value={{flight.base_price}} disabled>
 							</div>
 							<select class="form-select" name="airplane_id" id="airplane_id" required>
-								<option disabled selected>Select Airplane</option>
-								{% for airplane in airplanes %}
-									<option value="{{airplane.airline_name}}[*]{{airplane.identification_number}}">{{airplane.airline_name}} {{airplane.identification_number}}</option>
-								{% endfor %}
+								<option disabled selected>{{flight.airplane_id}}</option>
 							</select>
                                     
 								</div>

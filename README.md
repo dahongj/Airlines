@@ -14,10 +14,10 @@ The core attributes of the program includes:
 To access either the staff or customer page, users must enter credentials in the form of
 a username and password, which are all stored in an SQL database
 
-##Public Page
+## Public Page
 The public page contains:
 - Search functionality for flights based on source city, destination, date, and airport names
 - Registration for either staff or customer members
 - Encrypted login for either staff or customer members
 
-##Customer Page
+## Customer Page
